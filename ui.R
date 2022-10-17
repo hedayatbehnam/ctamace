@@ -1,0 +1,294 @@
+
+library(shiny)
+library(shinydashboard)
+library(shinyjs)
+
+
+sidebar <- dashboardSidebar(
+
+  sidebarMenu(
+    menuItem("Home", tabName = "home", icon = icon("home")),
+    menuItem("Authors", tabName = "authors", icon = icon("pencil-alt")),
+    menuItem("Abstract", tabName = "abstract", icon = icon("file")),
+    menuItem("Prediction Tool", tabName = "prediction", icon = icon("wrench"),
+             badgeLabel = "API", badgeColor = "purple"),
+    menuItem("Contact", tabName = "contact", icon = icon("phone")),
+    menuItem("About", tabName = "about", icon = icon("info"))
+  )
+)
+
+jsCode <- "
+          shinyjs.collapse = function(boxid) {
+          $('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
+          }
+          "
+
+body <- dashboardBody(
+  
+    useShinyjs(),
+    extendShinyjs(text = jsCode, functions = c("collapse")),
+    
+    tags$style('.content-wrapper, .right-side {
+                                  background-color: white;
+                              }
+
+                .home-title{
+                          font-weight:bold;
+                          font-size : 26px;
+                          text-align:center;
+
+                }
+                
+                .home-box-title{
+                      
+                          font-size : 20px;
+                          text-align:center;
+
+                }
+                
+                .abstract-text{
+                
+                  width:80%; 
+                  margin-top:0px; 
+                  font-size:17px;
+                }
+                
+                
+                img {
+
+                  margin-top:80px;
+                  margin-bottom: 20px;
+                
+                }
+                
+                .thc-logo-text{
+                
+                  font-size:24px;
+                  font-weight: bold;
+                
+                }
+                
+                .thc-logo-subtext{
+                
+                  font-size:18px;
+                  margin-bottom: 80px;
+
+                }
+                
+                .predict-text{
+                  font-size:17px;
+                  width:80%;
+                
+                }
+                
+                @media only screen and (max-width:602px){
+                
+                .home-title{
+                    font-size : 18px;
+                    
+                    width:100%;
+                    transform:translate(0,0);
+                }
+                    
+                .predict-text{
+                  font-size:14px;
+                  width:100%;
+                
+                }
+                
+                .abstract-text{
+                
+                  width:100%; 
+                  margin-top:0px; 
+                  font-size:17px;
+                }
+                
+                }
+                
+                
+                @media only screen and (max-width:980px){
+                
+                .home-title{
+                    font-size : 18px;
+                    
+                    width:100%;
+                    transform:translate(0,0);
+                }
+                  
+                .predict-text{
+                  font-size:14px;
+                  width:100%;
+                
+                }
+                
+                .abstract-text{
+                
+                  width:100%; 
+                  margin-top:0px; 
+                  font-size:17px;
+                }
+                }                   
+            '),
+  
+  tags$script(HTML("$('body').addClass('fixed');")),
+
+  tabItems(
+    
+    tabItem(tabName = "home",
+            
+            fluidRow(column(12,box(width=12, status = "primary", solidHeader = F,
+                         column(12, align="center",tags$div("Conventional vs. Machine Learning Scoring Models for 
+                         Prediction of MACE Using Coronary Multidetector 
+                         Computed Tomography", class="home-title"))))),
+            
+            
+            fluidRow(width=12, solidHeader = F,
+                column(12, align="center",tags$div(img(src='logothc.png', align = "center", width=200
+                                                        ),br(),
+                                                   p("Tehran Heart Center", class="thc-logo-text"),
+                                                   p("Artificial Intelligence Division", class="thc-logo-subtext")))),
+           
+             fluidRow(column(6,box(width=12 , background = "light-blue",
+                                  tags$div("Using Seven Machine Learning Models to Predict 
+                                                                     Outcome in File Format of .RDS, .CSV, SPSS, .xlsx ",
+                                                                     class="home-box-title"))),
+                     
+                     column(6,box(width=12, background = "teal",
+                                  column(12, align="center",tags$div("An Online Machine Learning Tool to Predict Two 
+                               Years Major Adverse Cardiovascular Events  
+                               Following Coronary MDCT", class="home-box-title"))))
+            ),
+    ),
+  
+    tabItem(tabName = "authors",
+            box( width = 12, status = "primary",
+            
+            div(p(span("Authors and Affiliations:", style="font-weight:bold; font-size:24px;")),hr(),
+                  "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
+                  "Amir Fazeli, MD", tags$sup("1"), br(),
+                  "Behnam Hedayat, MD", tags$sup("1"), br(),
+                  "Hamid Mokhtari, PhD", tags$sup("4"),br(),
+                  "Arash Jalali, PhD", tags$sup("1"),br(),
+                  "Pooria Ahmadi, MD", tags$sup("1"),br(),
+                  "Hamid Chalian, MD", tags$sup("3"),br(),
+                  "Nicola Luigi Bragazzi, MD, PhD",  tags$sup("4"),br(),
+                  "Shapour Shirani, MD", tags$sup("5"), br(),
+                  "Negar Omidi, MD", tags$sup("5*"), br(),
+
+                  hr(),
+
+                  "1. Tehran Heart Center, Tehran University of Medical Science, Tehran, Iran.", br(),
+                  "2. Shahid Beheshti University of Medical Science, Tehran, Iran.", br(),
+                  "3. Division of Cardiothoracic Imaging, Department of Radiology, 
+                      University of Washington, Seattle, Washington, USA.", br(),
+                  "4. Laboratory for industrial and applied mathematics (LIAM), 
+                      Department of mathematics and statistics, York university, 
+                      Toronto, Canada.",br(),
+                  "5. Department of Cardiovascular Imaging, Tehran Heart Center,
+                      Tehran University of Medical Sciences, Tehran, Iran.",
+                  br(),hr(),
+                  span("Correspondence:", style="font-weight:bold"),br(), "Negar Omidi, ", br(), "Associate Professor Department of Cardiovascular Imaging", br(),
+                    "Tehran Heart Center, ", br(), "Tehran University of Medical Sciences,", br(),
+                  "Kargar St. Jalal al-Ahmad Cross, zip code: 1411713138, Tehran, Iran.", 
+                  class="abstract-text"))),
+    
+    
+    tabItem(tabName = "abstract", box(width=12, status = "primary",
+                                    div(p(span("Abstract:", style="font-weight:bold; font-size:24px;")), hr(),
+                                    
+
+                                    p(strong("Background:")),"The study aims to compare the prognostic performance of
+                                    conventional scoring systems to a machine learning (ML) model on coronary computed tomography angiography
+                                    (CCTA) to discriminate between the patients with and without major adverse cardiovascular events (MACE) and to find the most
+                                    important contributing factor of MACE.", hr(),
+
+                                    p(strong("Materials and methods:")),"From November to December 2019, 500 of 1586 CCTA scans were included and analyzed,
+                                    then six conventional scores were calculated for each participant, and seven ML models were designed.
+                                    Our study endpoints were all-cause mortality, non-fatal myocardial infarction, late coronary revascularization,
+                                    and hospitalization for unstable angina or heart failure.
+                                    Score performance was assessed by area under the curve (AUC) analysis.", hr(),
+
+                                    p(strong("Results:")),"Of 500 patients (mean age: 60±10; 53.8% male) referred for CCTA, 416 patients have met inclusion criteria,
+                                    46 patients with early (<90 days) cardiac evaluation (due to the inability to clarify the reason for assessment,
+                                    deterioration of the symptoms vs. the CCTA result), and 38 patients because of missed follow-up were not enrolled in the final analysis.
+                                    Forty-six patients (11.0%) developed MACE within 20.5±7.9 months of follow-up. Compared to conventional scores,
+                                    ML models showed better performance,
+                                    only one model which is eXtreme Gradient Boosting had lower performance than conventional scoring systems
+                                    (AUC:0.824, 95% confidence interval (CI): 0.701-0.947).
+                                    Between ML models, Random Forest, Ensemble With Generalized Linear, and Ensemble With Naive-Bayes
+                                    were shown to have higher prognostic performance (AUC: 0.92, 95% CI: 0.85-0.99,
+                                    AUC: 0.90, 95% CI: 0.81-0.98, and AUC: 0.89, 95% CI: 0.82-0.97), respectively. Coronary artery calcium score (CACS)
+                                    had the highest correlation with MACE.", hr(),
+
+                                    p(strong("Conclusion:")), "Compared to the conventional scoring system, ML models using CCTA scans show
+                                    improved prognostic prediction for MACE.
+                                    Anatomical features were more important than clinical characteristics.",
+                                    class="abstract-text"))
+    ),
+    
+    tabItem(tabName = "prediction",
+            fluidRow(box(width=12,status="primary", title=strong("Prediction Tool"),
+
+                      p("Here a prediction tool is provided based on seven machine 
+                      learning models trained on 313 patients
+                      which underwent elective coronary MDCT, to predict major 
+                      cardiovascular event (MACE) with using 
+                      coronary MDCT anatomical features combined with clinical features.
+                      ", class="predict-text"), 
+                      
+                      p("You can upload your custom file from file input box bellow. 
+                      Allowed format is *.RDS, *.csv,
+                        *.sav and *.xlsx", class="predict-text"),
+                      p("Because the models have been trained with specific names 
+                      of features, your dataset 
+                      features names should be transformed to the names provided in 
+                      'Variables Names' box bellow to 
+                      enable prediction.", class="predict-text"),
+              
+            )), br(),
+            
+            fluidRow(box(title=actionLink("titleId", strong("Variables Names"),
+                     icon =icon("plus")),id="varnames",width=12,
+                     status="primary", collapsible = T, collapsed = T,
+                     dataTableOutput("tableVarNames"))    
+            ),
+          
+            fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
+                     p("You can upload your data with *.rds, *.csv, *.sav or 
+                      .xlsx format. If you do not upload a file, our test set in 
+                      the study would be used for prediction", class="predict-text"),
+                     fileInput("rdsFile", label = "Please Upload Your Data:"),
+                         
+                     selectInput("models", "Please Select a Model", 
+                                 choices = c("RF", "Ensemble GLM", "Ensemble NB", 
+                                             "GBM", "GLM LR Ridge", "FNN", "Xgboost"), 
+                                 selected = "RF", width = '200px'),
+                         
+                     dataTableOutput("tableOne"),
+                     verbatimTextOutput("rf_model_txt"),
+                     tableOutput("rf_predict"),
+                     verbatimTextOutput('performance'),
+                     tableOutput('prediction')))
+    ),
+    
+    
+    tabItem(tabName = "contact",box(width=12, status = "primary",
+            div(p(span("Contact:", style="font-weight:bold; font-size:24px;")), hr(),
+                style="width:80%; margin-top:0px; font-size:16px;"))
+    ),
+    
+    
+    tabItem(tabName = "about",box(width=12, status="primary",
+            div(p(span("About", style="font-weight:bold; font-size:24px;")), hr(),
+                style="width:80%; margin-top:0px; font-size:16px;"))
+    )
+    
+  )
+)
+
+dashboardPage(
+  skin = "purple",
+  dashboardHeader(title = "CTAMACE"),
+  sidebar,
+  body
+)
