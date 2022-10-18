@@ -17,36 +17,31 @@ sidebar <- dashboardSidebar(
   )
 )
 
-jsCode <- "
-          shinyjs.collapse = function(boxid) {
-          $('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
-          }
-          "
 
 body <- dashboardBody(
   
-    useShinyjs(),
-    extendShinyjs(text = jsCode, functions = c("collapse")),
-    
-    tags$style('.content-wrapper, .right-side {
-                                  background-color: white;
-                              }
 
-                .home-title{
+    tags$style('
+    
+    
+                .content-wrapper, .right-side {
+                                  background-color: white;
+                }
+
+                .home-title {
                           font-weight:bold;
                           font-size : 26px;
                           text-align:center;
 
                 }
                 
-                .home-box-title{
+                .home-box-title {
                       
                           font-size : 20px;
                           text-align:center;
-
                 }
                 
-                .abstract-text{
+                .abstract-text {
                 
                   width:80%; 
                   margin-top:0px; 
@@ -61,21 +56,22 @@ body <- dashboardBody(
                 
                 }
                 
-                .thc-logo-text{
+                .thc-logo-text { 
                 
                   font-size:24px;
                   font-weight: bold;
                 
                 }
                 
-                .thc-logo-subtext{
+                .thc-logo-subtext {
                 
                   font-size:18px;
                   margin-bottom: 80px;
 
                 }
                 
-                .predict-text{
+                .predict-text {
+                
                   font-size:17px;
                   width:80%;
                 
@@ -83,14 +79,15 @@ body <- dashboardBody(
                 
                 @media only screen and (max-width:602px){
                 
-                .home-title{
-                    font-size : 18px;
-                    
-                    width:100%;
-                    transform:translate(0,0);
+                .home-title {
+                
+                  font-size : 18px;
+                  width:100%;
+                  transform:translate(0,0);
                 }
                     
-                .predict-text{
+                .predict-text {
+                
                   font-size:14px;
                   width:100%;
                 
@@ -108,20 +105,20 @@ body <- dashboardBody(
                 
                 @media only screen and (max-width:980px){
                 
-                .home-title{
+                .home-title {
                     font-size : 18px;
-                    
                     width:100%;
                     transform:translate(0,0);
                 }
                   
-                .predict-text{
+                .predict-text {
+                
                   font-size:14px;
                   width:100%;
                 
                 }
                 
-                .abstract-text{
+                .abstract-text {
                 
                   width:100%; 
                   margin-top:0px; 
@@ -132,9 +129,10 @@ body <- dashboardBody(
   
   tags$script(HTML("$('body').addClass('fixed');")),
 
+  
   tabItems(
     
-    tabItem(tabName = "home",
+    tabItem(tabName = "home", 
             
             fluidRow(column(12,box(width=12, status = "primary", solidHeader = F,
                          column(12, align="center",tags$div("Conventional vs. Machine Learning Scoring Models for 
@@ -159,7 +157,7 @@ body <- dashboardBody(
                                Following Coronary MDCT", class="home-box-title"))))
             ),
     ),
-  
+    
     tabItem(tabName = "authors",
             box( width = 12, status = "primary",
             
@@ -167,7 +165,7 @@ body <- dashboardBody(
                   "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
                   "Amir Fazeli, MD", tags$sup("1"), br(),
                   "Behnam Hedayat, MD", tags$sup("1"), br(),
-                  "Hamid Mokhtari, PhD", tags$sup("4"),br(),
+                  "Hamid Mokhtari, PhD", tags$sup("1"),br(),
                   "Arash Jalali, PhD", tags$sup("1"),br(),
                   "Pooria Ahmadi, MD", tags$sup("1"),br(),
                   "Hamid Chalian, MD", tags$sup("3"),br(),
@@ -226,7 +224,11 @@ body <- dashboardBody(
                                     class="abstract-text"))
     ),
     
-    tabItem(tabName = "prediction",
+    
+    
+    tabItem(tabName = "prediction",height = "100vh",
+            
+            
             fluidRow(box(width=12,status="primary", title=strong("Prediction Tool"),
 
                       p("Here a prediction tool is provided based on seven machine 
@@ -247,13 +249,14 @@ body <- dashboardBody(
               
             )), br(),
             
-            fluidRow(box(title=actionLink("titleId", strong("Variables Names"),
-                     icon =icon("plus")),id="varnames",width=12,
+            fluidRow(box(title=strong("Variables Names"),
+                     id="varnames",width=12,
                      status="primary", collapsible = T, collapsed = T,
                      dataTableOutput("tableVarNames"))    
             ),
           
             fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
+                         collapsible = T, collapsed = T,
                      p("You can upload your data with *.rds format. In the near
                      future uplding data file format of *.csv, *.sav or 
                       *.xlsx also would be available. 
@@ -263,18 +266,29 @@ body <- dashboardBody(
                      
                      fileInput("rdsFile", label = "Please Upload Your Data:",
                                width="300px"),
-                       
-                         
+                     
                      selectInput("models", "Please Select a Model", 
                                  choices = c("RF", "Ensemble GLM", "Ensemble NB", 
                                              "GBM", "GLM LR Ridge", "FNN", "Xgboost"), 
                                  selected = "RF", width = '200px'),
+                  
+                     p(strong("Click predict... button bellow to initiate prediction")),
+                     
+                     actionButton("predict_btn", label = "Predict...", width = "100px"),
+                     
+                     br(),
+                     
+                     br(),
                          
                      dataTableOutput("tableOne"),
-                     verbatimTextOutput("rf_model_txt"),
-                     tableOutput("rf_predict"),
+
                      verbatimTextOutput('performance'),
-                     tableOutput('prediction')))
+                     tableOutput('prediction')),
+                     
+                     br()
+                
+                     )
+
     ),
     
     
