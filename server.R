@@ -12,6 +12,16 @@ server <- function(input, output) {
 
   h2o.init(max_mem_size = "1G", nthreads = 2)
   h2o.no_progress()
+  
+  rf_model <- h2o.loadModel("www/rf_grid1_model_20")
+  ensGlm_model <- h2o.loadModel("www/ensembledModel_glm")
+  ensNb_model <- h2o.loadModel("www/ensembledModel_nb")
+  gbm_model <- h2o.loadModel("www/gbm_grid1_model_33")
+  glm_model <- h2o.loadModel("www/glm_grid1_model_2")
+  fnn_model <- h2o.loadModel("www/fnn_grid1_model_17")
+  xgboost_model <- h2o.loadModel("www/xgb_grid1_model_38")
+  
+  
 
   output$tableVarNames <- renderDataTable({varnames}, options = list(
                                                               pageLength=10))
@@ -49,7 +59,7 @@ server <- function(input, output) {
       final <- readRDS(input$rdsFile$datapath)
       
     }
-    
+
     
     test_data <- prep(blueprint, training = final)
 
