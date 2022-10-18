@@ -237,8 +237,8 @@ body <- dashboardBody(
                       ", class="predict-text"), 
                       
                       p("You can upload your custom file from file input box bellow. 
-                      Allowed format is *.RDS, *.csv,
-                        *.sav and *.xlsx", class="predict-text"),
+                      At the moment Allowed format is *.rds. In the near future, 
+                      *.csv, *.sav and *.xlsx formats also would be allowed.", class="predict-text"),
                       p("Because the models have been trained with specific names 
                       of features, your dataset 
                       features names should be transformed to the names provided in 
@@ -254,10 +254,16 @@ body <- dashboardBody(
             ),
           
             fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
-                     p("You can upload your data with *.rds, *.csv, *.sav or 
-                      .xlsx format. If you do not upload a file, our test set in 
-                      the study would be used for prediction", class="predict-text"),
-                     fileInput("rdsFile", label = "Please Upload Your Data:"),
+                     p("You can upload your data with *.rds format. In the near
+                     future uplding data file format of *.csv, *.sav or 
+                      *.xlsx also would be available. 
+                      If you do not upload a file, a new sample test set
+                      with known target variable
+                       would be used for prediction as default.", class="predict-text"),
+                     
+                     fileInput("rdsFile", label = "Please Upload Your Data:",
+                               width="300px"),
+                       
                          
                      selectInput("models", "Please Select a Model", 
                                  choices = c("RF", "Ensemble GLM", "Ensemble NB", 
