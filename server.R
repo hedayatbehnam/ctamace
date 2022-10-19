@@ -5,8 +5,6 @@ library(readxl)
 library(h2o)
 library(recipes)
 library(tools)
-library(shinyalert)
-
 
 server <- function(input, output) {
   
@@ -14,10 +12,8 @@ server <- function(input, output) {
   varnames <- readRDS("www/varnames.RDS")
   studyTest <- readRDS("www/df_test.RDS")
 
-
   output$tableVarNames <- renderDataTable({varnames}, options = list(
                                                               pageLength=10))
-  
   
   h2o.init(max_mem_size = "1G", nthreads = 2)
   h2o.no_progress()
@@ -29,8 +25,7 @@ server <- function(input, output) {
   glm_model <- h2o.loadModel("www/glm_grid1_model_2")
   fnn_model <- h2o.loadModel("www/fnn_grid1_model_17")
   xgboost_model <- h2o.loadModel("www/xgb_grid1_model_38")
-
-
+  
   model <- eventReactive(input$predict_btn,{
 
     if (input$models == "RF"){
@@ -51,8 +46,6 @@ server <- function(input, output) {
     selected_model
   })
   
-  
-
   data <- reactive({
     
     dataset <- NULL
@@ -65,8 +58,7 @@ server <- function(input, output) {
     } else {
       
       loadedFile <- input$loadFile
-      
-      
+    
     ext <- tools::file_ext(loadedFile$datapath)
     
     req(loadedFile)
@@ -91,7 +83,6 @@ server <- function(input, output) {
       
     }
       
-    
     validate(
       
       need(names(dataset) %in% names(studyTest), "At least one variable name
@@ -100,14 +91,12 @@ server <- function(input, output) {
     
     }
     
-    
     if (!"Total_MACE" %in% names(dataset)){
       noTarget <- TRUE
       fake_col <- sample(c("No", "Yes"), nrow(dataset), replace = T)
       dataset$Total_MACE <- as.factor(fake_col)
     }
 
-    
     test_data <- prep(blueprint, training = dataset)
     
     test_data_j <- test_data %>% juice()
@@ -119,12 +108,8 @@ server <- function(input, output) {
     test_data_h2o <- test_data_j %>% as.h2o()
     
     test_data_h2o
-    
-
-    
+  
   })
-  
-  
   
   check_performance <- reactive({ 
     
@@ -142,8 +127,6 @@ server <- function(input, output) {
     
   })
   
-
-    
   output$performance <- renderPrint({
 
     if (check_performance()){
@@ -152,8 +135,6 @@ server <- function(input, output) {
       
     }
   })
-  
-
   
   output$predict_tbl <- renderDataTable({
     

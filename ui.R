@@ -1,8 +1,5 @@
-
 library(shiny)
 library(shinydashboard)
-library(shinyjs)
-
 
 sidebar <- dashboardSidebar(
 
@@ -17,13 +14,9 @@ sidebar <- dashboardSidebar(
   )
 )
 
-
 body <- dashboardBody(
   
-
     tags$style('
-    
-    
                 .content-wrapper, .right-side {
                                   background-color: white;
                 }
@@ -102,7 +95,6 @@ body <- dashboardBody(
                 
                 }
                 
-                
                 @media only screen and (max-width:980px){
                 
                 .home-title {
@@ -129,7 +121,6 @@ body <- dashboardBody(
   
   tags$script(HTML("$('body').addClass('fixed');")),
 
-  
   tabItems(
     
     tabItem(tabName = "home", 
@@ -225,7 +216,6 @@ body <- dashboardBody(
     ),
     
 
-    
     tabItem(tabName = "prediction",height = "100vh",
             tabsetPanel(type="tabs",
                         
