@@ -161,7 +161,7 @@ body <- dashboardBody(
     tabItem(tabName = "authors",
             box( width = 12, status = "primary",
             
-            div(p(span("Authors and Affiliations:", style="font-weight:bold; font-size:24px;")),hr(),
+            div(p(span("Authors and Affiliations", style="font-weight:bold; font-size:24px;")),hr(),
                   "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
                   "Amir Fazeli, MD", tags$sup("1"), br(),
                   "Behnam Hedayat, MD", tags$sup("1"), br(),
@@ -192,9 +192,9 @@ body <- dashboardBody(
     
     
     tabItem(tabName = "abstract", box(width=12, status = "primary",
-                                    div(p(span("Abstract:", style="font-weight:bold; font-size:24px;")), hr(),
+                                    div(p(span("Abstract", style="font-weight:bold; font-size:24px;")), hr(),
                                     
-
+                            
                                     p(strong("Background:")),"The study aims to compare the prognostic performance of
                                     conventional scoring systems to a machine learning (ML) model on coronary computed tomography angiography
                                     (CCTA) to discriminate between the patients with and without major adverse cardiovascular events (MACE) and to find the most
@@ -229,25 +229,24 @@ body <- dashboardBody(
     tabItem(tabName = "prediction",height = "100vh",
             
             
-            fluidRow(box(width=12,status="primary", title=strong("Prediction Tool"),
-
+            fluidRow(box(width=12,status="primary",
+                         div(p(span("Prediction Tool", style="font-weight:bold; font-size:24px;")), hr(),
                       p("Here a prediction tool is provided based on seven machine 
-                      learning models trained on 313 patients
+                      learning models trained on patients
                       which underwent elective coronary MDCT, to predict major 
                       cardiovascular event (MACE) with using 
                       coronary MDCT anatomical features combined with clinical features.
                       ", class="predict-text"), 
                       
                       p("You can upload your custom file from file input box bellow. 
-                      At the moment Allowed format is *.rds. In the near future, 
-                      *.csv, *.sav and *.xlsx formats also would be allowed.", class="predict-text"),
+                      At the moment Allowed format is *.rds, *.csv, *.sav and *.xlsx formats.", class="predict-text"),
                       p("Because the models have been trained with specific names 
                       of features, your dataset 
                       features names should be transformed to the names provided in 
                       'Variables Names' box bellow to 
                       enable prediction.", class="predict-text"),
               
-            )), br(),
+            ))), br(),
             
             fluidRow(box(title=strong("Variables Names"),
                      id="varnames",width=12,
@@ -257,15 +256,15 @@ body <- dashboardBody(
           
             fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
                          collapsible = T, collapsed = T,
-                     p("You can upload your data with *.rds format. In the near
-                     future uplding data file format of *.csv, *.sav or 
-                      *.xlsx also would be available. 
+                     p("You can upload your data with *.rds, *.csv, *.sav or 
+                      *.xlsx formats. 
                       If you do not upload a file, a new sample test set
                       with known target variable
                        would be used for prediction as default.", class="predict-text"),
                      
-                     fileInput("rdsFile", label = "Please Upload Your Data:",
-                               width="300px"),
+                     fileInput("loadFile", label = "Please Upload Your Data:",
+                               width="300px", accept = c(".csv", ".rds", ".xlsx", 
+                                                         ".sav")),
                      
                      selectInput("models", "Please Select a Model", 
                                  choices = c("RF", "Ensemble GLM", "Ensemble NB", 

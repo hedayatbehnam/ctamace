@@ -1,14 +1,17 @@
 library(shiny)
 library(shinydashboard)
-
+library(foreign)
+library(readxl)
 library(h2o)
 library(recipes)
+library(tools)
+library(stringr)
 
 server <- function(input, output) {
 
   blueprint <- readRDS("www/blueprint_mod.RDS")
   varnames <- readRDS("www/varnames.RDS")
-  studyTest <- readRDS("www/studyTest_new.RDS")
+  studyTest <- readRDS("www/df_test.RDS")
 
   h2o.init(max_mem_size = "1G", nthreads = 2)
   h2o.no_progress()
@@ -20,7 +23,8 @@ server <- function(input, output) {
   glm_model <- h2o.loadModel("www/glm_grid1_model_2")
   fnn_model <- h2o.loadModel("www/fnn_grid1_model_17")
   xgboost_model <- h2o.loadModel("www/xgb_grid1_model_38")
-  
+
+
 
   output$tableVarNames <- renderDataTable({varnames}, options = list(
                                                               pageLength=10))
@@ -50,24 +54,50 @@ server <- function(input, output) {
   data <- reactive({
     
     
-    if (is.null(input$rdsFile$datapath)){
+    dataset <- NULL
+    
+    if (is.null(input$loadFile$datapath)){
       
-      final <- studyTest
+      loadedFile <- studyTest
       
     } else {
       
-      req(input$rdsFile)
-      final <- readRDS(input$rdsFile$datapath)
+      loadedFile <- input$loadFile
+      
+      
+    ext <- tools::file_ext(loadedFile$datapath)
+    
+    req(loadedFile)
+  
+    validate(need(tolower(ext) %in% c("csv", "rds", "xlsx", "sav"), "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
+      
+    if (tolower(ext) == "rds"){
+      
+      dataset <- readRDS(input$loadFile$datapath)
+      
+    } else if (tolower(ext) == "csv"){
+      
+      dataset <- read.csv(input$loadFile$datapath)
+      
+    } else if (tolower(ext) == "sav") {
+      
+      dataset <- read.spss(input$loadFile$datapath, to.data.frame = TRUE)
+      
+    } else if (tolower(ext) == "xlsx") {
+      
+      dataset <- read_excel(input$loadFile$datapath)
       
     }
-    
-    # if (!identical(varnames[,1], names(final))) {
-    #     showNotification("At least one variable names differs from
-    #                      trained model variables", 
-    #                      type = "error")
       
     
-    test_data <- prep(blueprint, training = final)
+    validate(
+      need(names(dataset) %in% names(studyTest), "At least one variable name
+      in uploaded dataset is not the same with original study train set variable names")
+    )
+    
+    }
+    
+    test_data <- prep(blueprint, training = dataset)
 
     test_data_j <- test_data %>% juice()
 
@@ -118,10 +148,6 @@ server <- function(input, output) {
   #   }
   # })
   
-  
 
-  observeEvent(input$titleId, {
-    js$collapse("varnames")
-  })
   
 }
