@@ -5,14 +5,20 @@ library(readxl)
 library(h2o)
 library(recipes)
 library(tools)
+library(shinyalert)
 
 
 server <- function(input, output) {
-
+  
   blueprint <- readRDS("www/blueprint_mod.RDS")
   varnames <- readRDS("www/varnames.RDS")
   studyTest <- readRDS("www/df_test.RDS")
 
+
+  output$tableVarNames <- renderDataTable({varnames}, options = list(
+                                                              pageLength=10))
+  
+  
   h2o.init(max_mem_size = "1G", nthreads = 2)
   h2o.no_progress()
  
@@ -25,10 +31,6 @@ server <- function(input, output) {
   xgboost_model <- h2o.loadModel("www/xgb_grid1_model_38")
 
 
-
-  output$tableVarNames <- renderDataTable({varnames}, options = list(
-                                                              pageLength=10))
-  
   model <- eventReactive(input$predict_btn,{
 
     if (input$models == "RF"){
@@ -53,12 +55,12 @@ server <- function(input, output) {
 
   data <- reactive({
     
-    
     dataset <- NULL
+    noTarget <- FALSE
     
     if (is.null(input$loadFile$datapath)){
-      
-      loadedFile <- studyTest
+
+      dataset <- loadedFile <- studyTest
       
     } else {
       
@@ -73,37 +75,51 @@ server <- function(input, output) {
       
     if (tolower(ext) == "rds"){
       
-      dataset <- readRDS(input$loadFile$datapath)
+      dataset <- readRDS(loadedFile$datapath)
       
     } else if (tolower(ext) == "csv"){
       
-      dataset <- read.csv(input$loadFile$datapath)
+      dataset <- read.csv(loadedFile$datapath)
       
     } else if (tolower(ext) == "sav") {
       
-      dataset <- read.spss(input$loadFile$datapath, to.data.frame = TRUE)
+      dataset <- read.spss(loadedFile$datapath, to.data.frame = TRUE)
       
     } else if (tolower(ext) == "xlsx") {
       
-      dataset <- read_excel(input$loadFile$datapath)
+      dataset <- read_excel(loadedFile$datapath)
       
     }
       
     
     validate(
+      
       need(names(dataset) %in% names(studyTest), "At least one variable name
       in uploaded dataset is not the same with original study train set variable names")
     )
     
     }
     
-    test_data <- prep(blueprint, training = dataset)
+    
+    if (!"Total_MACE" %in% names(dataset)){
+      noTarget <- TRUE
+      fake_col <- sample(c("No", "Yes"), nrow(dataset), replace = T)
+      dataset$Total_MACE <- as.factor(fake_col)
+    }
 
+    
+    test_data <- prep(blueprint, training = dataset)
+    
     test_data_j <- test_data %>% juice()
+    
+    if (noTarget){
+      test_data_j$Total_MACE <- NULL
+    }
 
     test_data_h2o <- test_data_j %>% as.h2o()
     
     test_data_h2o
+    
 
     
   })
@@ -130,7 +146,6 @@ server <- function(input, output) {
     
   output$performance <- renderPrint({
 
-    
     if (check_performance()){
 
       h2o.performance(model(), newdata = data())
@@ -140,13 +155,31 @@ server <- function(input, output) {
   
 
   
-  # output$prediction <- renderDataTable({
-  #   
-  #   if (check_performance()){
-  #     
-  #     h2o.predict(model(), newdata = data())
-  #   }
-  # })
+  output$predict_tbl <- renderDataTable({
+    
+    if (check_performance()){
+
+      h2o.predict(model(), newdata = data())
+      
+    } else {
+      fake_col <- as.h2o(data.frame(Total_MACE = as.factor(sample(c("No", "Yes"), 
+                                          nrow(data()), replace = T)),
+                                          stringsAsFactors = F))
+      
+      dataset_mod <- h2o.cbind(data(), fake_col)
+      
+      output$performance <- renderText({
+        "No performance assessment was conducted due to unknown target variable
+in uploaded data file.
+please click on 'Table' tab to see prediction result."
+      })
+      
+      h2o.predict(model(), newdata = dataset_mod)
+      
+    }
+  })
+  
+  
   
 
   

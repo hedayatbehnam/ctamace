@@ -135,9 +135,9 @@ body <- dashboardBody(
     tabItem(tabName = "home", 
             
             fluidRow(column(12,box(width=12, status = "primary", solidHeader = F,
-                         column(12, align="center",tags$div("Conventional vs. Machine Learning Scoring Models for 
+                         column(12, align="center",tags$div("Machine Learning Scoring Models for 
                          Prediction of MACE Using Coronary Multidetector 
-                         Computed Tomography", class="home-title"))))),
+                         Computed Tomography Anatomical Findings and Clinical Features", class="home-title"))))),
             
             
             fluidRow(width=12, solidHeader = F,
@@ -148,7 +148,7 @@ body <- dashboardBody(
            
              fluidRow(column(6,box(width=12 , background = "light-blue",
                                   tags$div("Using Seven Machine Learning Models to Predict 
-                                                                     Outcome in File Format of .RDS, .CSV, SPSS, .xlsx ",
+                                                                     Outcome in File Format of .RDS, .csv, .sav, .xlsx ",
                                                                      class="home-box-title"))),
                      
                      column(6,box(width=12, background = "teal",
@@ -192,103 +192,116 @@ body <- dashboardBody(
     
     
     tabItem(tabName = "abstract", box(width=12, status = "primary",
-                                    div(p(span("Abstract", style="font-weight:bold; font-size:24px;")), hr(),
-                                    
-                            
-                                    p(strong("Background:")),"The study aims to compare the prognostic performance of
-                                    conventional scoring systems to a machine learning (ML) model on coronary computed tomography angiography
-                                    (CCTA) to discriminate between the patients with and without major adverse cardiovascular events (MACE) and to find the most
-                                    important contributing factor of MACE.", hr(),
+                  div(p(span("Abstract", style="font-weight:bold; font-size:24px;")), hr(),
+                  
+          
+                  p(strong("Background:")),"The study aims to compare the prognostic performance of
+                  conventional scoring systems to a machine learning (ML) model on coronary computed tomography angiography
+                  (CCTA) to discriminate between the patients with and without major adverse cardiovascular events (MACE) and to find the most
+                  important contributing factor of MACE.", hr(),
 
-                                    p(strong("Materials and methods:")),"From November to December 2019, 500 of 1586 CCTA scans were included and analyzed,
-                                    then six conventional scores were calculated for each participant, and seven ML models were designed.
-                                    Our study endpoints were all-cause mortality, non-fatal myocardial infarction, late coronary revascularization,
-                                    and hospitalization for unstable angina or heart failure.
-                                    Score performance was assessed by area under the curve (AUC) analysis.", hr(),
+                  p(strong("Materials and methods:")),"From November to December 2019, 500 of 1586 CCTA scans were included and analyzed,
+                  then six conventional scores were calculated for each participant, and seven ML models were designed.
+                  Our study endpoints were all-cause mortality, non-fatal myocardial infarction, late coronary revascularization,
+                  and hospitalization for unstable angina or heart failure.
+                  Score performance was assessed by area under the curve (AUC) analysis.", hr(),
 
-                                    p(strong("Results:")),"Of 500 patients (mean age: 60±10; 53.8% male) referred for CCTA, 416 patients have met inclusion criteria,
-                                    46 patients with early (<90 days) cardiac evaluation (due to the inability to clarify the reason for assessment,
-                                    deterioration of the symptoms vs. the CCTA result), and 38 patients because of missed follow-up were not enrolled in the final analysis.
-                                    Forty-six patients (11.0%) developed MACE within 20.5±7.9 months of follow-up. Compared to conventional scores,
-                                    ML models showed better performance,
-                                    only one model which is eXtreme Gradient Boosting had lower performance than conventional scoring systems
-                                    (AUC:0.824, 95% confidence interval (CI): 0.701-0.947).
-                                    Between ML models, Random Forest, Ensemble With Generalized Linear, and Ensemble With Naive-Bayes
-                                    were shown to have higher prognostic performance (AUC: 0.92, 95% CI: 0.85-0.99,
-                                    AUC: 0.90, 95% CI: 0.81-0.98, and AUC: 0.89, 95% CI: 0.82-0.97), respectively. Coronary artery calcium score (CACS)
-                                    had the highest correlation with MACE.", hr(),
+                  p(strong("Results:")),"Of 500 patients (mean age: 60±10; 53.8% male) referred for CCTA, 416 patients have met inclusion criteria,
+                  46 patients with early (<90 days) cardiac evaluation (due to the inability to clarify the reason for assessment,
+                  deterioration of the symptoms vs. the CCTA result), and 38 patients because of missed follow-up were not enrolled in the final analysis.
+                  Forty-six patients (11.0%) developed MACE within 20.5±7.9 months of follow-up. Compared to conventional scores,
+                  ML models showed better performance,
+                  only one model which is eXtreme Gradient Boosting had lower performance than conventional scoring systems
+                  (AUC:0.824, 95% confidence interval (CI): 0.701-0.947).
+                  Between ML models, Random Forest, Ensemble With Generalized Linear, and Ensemble With Naive-Bayes
+                  were shown to have higher prognostic performance (AUC: 0.92, 95% CI: 0.85-0.99,
+                  AUC: 0.90, 95% CI: 0.81-0.98, and AUC: 0.89, 95% CI: 0.82-0.97), respectively. Coronary artery calcium score (CACS)
+                  had the highest correlation with MACE.", hr(),
 
-                                    p(strong("Conclusion:")), "Compared to the conventional scoring system, ML models using CCTA scans show
-                                    improved prognostic prediction for MACE.
-                                    Anatomical features were more important than clinical characteristics.",
-                                    class="abstract-text"))
+                  p(strong("Conclusion:")), "Compared to the conventional scoring system, ML models using CCTA scans show
+                  improved prognostic prediction for MACE.
+                  Anatomical features were more important than clinical characteristics.",
+                  class="abstract-text"))
     ),
     
-    
+
     
     tabItem(tabName = "prediction",height = "100vh",
+            tabsetPanel(type="tabs",
+                        
+            tabPanel("Introduction",
             
+                fluidRow(box(width=12,status="primary",
+                             div(p(span("Prediction Tool", style="font-weight:bold; font-size:24px;")), hr(),
+                          p("Here a prediction tool is provided based on seven machine 
+                          learning models trained on patients
+                          which underwent elective coronary MDCT, to predict major 
+                          cardiovascular event (MACE) with using 
+                          coronary MDCT anatomical features combined with clinical features.
+                          ", class="predict-text"), 
+                          
+                          p("You can upload your custom file from file input box bellow. 
+                          At the moment Allowed format is *.rds, *.csv, *.sav and *.xlsx formats.", class="predict-text"),
+                          p("Because the models have been trained with specific names 
+                          of features, your dataset 
+                          features names should be transformed to the names provided in 
+                          'Variables Names' box bellow to 
+                          enable prediction.", class="predict-text"),
+                  
+                ))), br(),
+                
+                fluidRow(box(title=strong("Variables Names"),
+                         id="varnames",width=12,
+                         status="primary", collapsible = T, collapsed = F,
+                         dataTableOutput("tableVarNames"))    
+                )
             
-            fluidRow(box(width=12,status="primary",
-                         div(p(span("Prediction Tool", style="font-weight:bold; font-size:24px;")), hr(),
-                      p("Here a prediction tool is provided based on seven machine 
-                      learning models trained on patients
-                      which underwent elective coronary MDCT, to predict major 
-                      cardiovascular event (MACE) with using 
-                      coronary MDCT anatomical features combined with clinical features.
-                      ", class="predict-text"), 
-                      
-                      p("You can upload your custom file from file input box bellow. 
-                      At the moment Allowed format is *.rds, *.csv, *.sav and *.xlsx formats.", class="predict-text"),
-                      p("Because the models have been trained with specific names 
-                      of features, your dataset 
-                      features names should be transformed to the names provided in 
-                      'Variables Names' box bellow to 
-                      enable prediction.", class="predict-text"),
-              
-            ))), br(),
-            
-            fluidRow(box(title=strong("Variables Names"),
-                     id="varnames",width=12,
-                     status="primary", collapsible = T, collapsed = T,
-                     dataTableOutput("tableVarNames"))    
             ),
           
-            fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
-                         collapsible = T, collapsed = T,
-                     p("You can upload your data with *.rds, *.csv, *.sav or 
-                      *.xlsx formats. 
-                      If you do not upload a file, a new sample test set
-                      with known target variable
-                       would be used for prediction as default.", class="predict-text"),
+            tabPanel("Prediction",
                      
-                     fileInput("loadFile", label = "Please Upload Your Data:",
-                               width="300px", accept = c(".csv", ".rds", ".xlsx", 
-                                                         ".sav")),
-                     
-                     selectInput("models", "Please Select a Model", 
-                                 choices = c("RF", "Ensemble GLM", "Ensemble NB", 
-                                             "GBM", "GLM LR Ridge", "FNN", "Xgboost"), 
-                                 selected = "RF", width = '200px'),
-                  
-                     p(strong("Click predict... button bellow to initiate prediction")),
-                     
-                     actionButton("predict_btn", label = "Predict...", width = "100px"),
-                     
-                     br(),
-                     
-                     br(),
+                fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
+                             collapsible = T, collapsed = F,
+                         p("You can upload your data with *.rds, *.csv, *.sav or 
+                          *.xlsx formats. 
+                          If you do not upload a file, a new sample test set
+                          with known target variable
+                           would be used for prediction as default.", class="predict-text"),
                          
-                     dataTableOutput("tableOne"),
+                         fileInput("loadFile", label = "Please Upload Your Data:",
+                                   width="300px"),
+                         
+                         selectInput("models", "Please Select a Model", 
+                                     choices = c("RF", "Ensemble GLM", "Ensemble NB", 
+                                                 "GBM", "GLM LR Ridge", "FNN", "Xgboost"), 
+                                     selected = "RF", width = '200px'),
+                      
+                         p(strong("Click predict... button bellow to initiate prediction")),
+                         
+                         actionButton("predict_btn", label = "Predict...", width = "100px"),
+                         
+                         br(),
+                         
+                         br(),
+                             
+                         verbatimTextOutput('performance'),
+                        
+                         ),
+                         
+                         br()
+                    
+                         )
 
-                     verbatimTextOutput('performance'),
-                     tableOutput('prediction')),
-                     
-                     br()
-                
-                     )
-
-    ),
+           ),
+    
+    
+    
+          tabPanel("Table",
+            
+            fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
+                         status="primary", collapsible = T, collapsed = F,
+                         dataTableOutput("predict_tbl"))
+          )))),
     
     
     tabItem(tabName = "contact",box(width=12, status = "primary",
@@ -299,7 +312,9 @@ body <- dashboardBody(
     
     tabItem(tabName = "about",box(width=12, status="primary",
             div(p(span("About", style="font-weight:bold; font-size:24px;")), hr(),
-                style="width:80%; margin-top:0px; font-size:16px;"))
+                style="width:80%; margin-top:0px; font-size:16px;"),
+            
+)
     )
     
   )
