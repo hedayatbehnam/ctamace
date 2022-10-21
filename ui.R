@@ -131,10 +131,10 @@ body <- dashboardBody(
     tabItem(tabName = "home", 
             
             fluidRow(column(12,box(width=12, status = "primary", solidHeader = F,
-                         column(12, align="center",tags$div("Machine Learning 
-                         Scoring Models for Prediction of MACE Using Coronary 
-                         Multidetector Computed Tomography Anatomical Findings 
-                         and Clinical Features", class="home-title"))))),
+                column(12, align="center",tags$div("Machine Learning 
+                Scoring Models for Prediction of MACE Using Coronary 
+                Multidetector Computed Tomography Anatomical Findings 
+                and Clinical Features", class="home-title"))))),
             
             fluidRow(width=12, solidHeader = F,
                 column(12, align="center",tags$div(img(src='logothc.png', 
@@ -148,13 +148,13 @@ body <- dashboardBody(
                               to Predict Outcome in file format of .RDS, 
                               .csv, .sav, .xlsx ",class="home-box-title"))),
                      
-                     column(6,box(width=12, background = "teal",
-                              column(12, align="center",tags$div("An Online 
-                              Machine Learning Tool to Predict Two 
-                              Years Major Adverse Cardiovascular Events  
-                              Following Coronary MDCT", class="home-box-title"))
-                              ))
-            ),
+                column(6,box(width=12, background = "teal",
+                          column(12, align="center",tags$div("An Online 
+                          Machine Learning Tool to Predict Two 
+                          Years Major Adverse Cardiovascular Events  
+                          Following Coronary MDCT", class="home-box-title"))
+                          ))
+        ),
     ),
     
     tabItem(tabName = "authors",
