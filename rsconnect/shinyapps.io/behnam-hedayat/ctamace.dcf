@@ -5,9 +5,10 @@ account: behnam-hedayat
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7318273
-bundleId: 6419225
+bundleId: 6426033
 url: https://behnam-hedayat.shinyapps.io/ctamace/
-when: 1666190002.96395
-lastSyncTime: 1666190002.96399
+when: 1666336807.77227
+lastSyncTime: 1666336807.77228
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: LICENSE|README.md|run.R
