@@ -173,11 +173,9 @@ body <- dashboardBody(
                   "Kargar St. Jalal al-Ahmad Cross, zip code: 1411713138, Tehran, Iran.", 
                   class="abstract-text"))),
     
-    
     tabItem(tabName = "abstract", box(width=12, status = "primary",
                   div(p(span("Abstract", style="font-weight:bold; font-size:24px;")), hr(),
-                  
-          
+            
                   p(strong("Background:")),"The study aims to compare the prognostic performance of
                   conventional scoring systems to a machine learning (ML) model on coronary computed tomography angiography
                   (CCTA) to discriminate between the patients with and without major adverse cardiovascular events (MACE) and to find the most
@@ -206,8 +204,7 @@ body <- dashboardBody(
                   Anatomical features were more important than clinical characteristics.",
                   class="abstract-text"))
     ),
-    
-
+  
     tabItem(tabName = "prediction",height = "100vh",
             tabsetPanel(type="tabs",
                         
@@ -294,12 +291,10 @@ body <- dashboardBody(
           
           )),
     
-    
     tabItem(tabName = "contact",box(width=12, status = "primary",
             div(p(span("Contact:", style="font-weight:bold; font-size:24px;")), hr(),
                 style="width:80%; margin-top:0px; font-size:16px;"))
     ),
-    
     
     tabItem(tabName = "about",box(width=12, status="primary",
             div(p(span("About", style="font-weight:bold; font-size:24px;")), hr(),
