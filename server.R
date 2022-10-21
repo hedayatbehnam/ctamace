@@ -88,8 +88,8 @@ server <- function(input, output) {
     
     if (!"Total_MACE" %in% names(dataset)){
       noTarget <- TRUE
-      fake_col <- sample(c("No", "Yes"), nrow(dataset), replace = T)
-      dataset$Total_MACE <- as.factor(fake_col)
+      f_col <- sample(c("No", "Yes"), nrow(dataset), replace = T)
+      dataset$Total_MACE <- as.factor(f_col)
     }
 
     test_data <- prep(blueprint, training = dataset)
@@ -149,7 +149,7 @@ please click on 'Table' tab to see prediction result."
         sample(c("No", "Yes"),nrow(data()), replace = T)),
                                     stringsAsFactors = F))
       
-      dataset_mod <- h2o.cbind(data(), fake_col)
+      dataset_mod <- h2o.cbind(data(), f_col)
       
       h2o.predict(model(), newdata = dataset_mod)
     }
