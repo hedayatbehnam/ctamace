@@ -11,16 +11,17 @@ library(ggplot2)
 server <- function(input, output) {
   
   rv <- reactiveValues()
-  rv$varnameComplete <- rv$predictTableComplete <- FALSE
+  rv$varnameComplete <- rv$predictTableComplete <- rv$perfComplete <- rv$perfPlot <- FALSE
     
   loadingFunc <- function(message='Loading ...') { 
+    
       withProgress(min=1, max=15, expr={
     
       for(i in 1:15) {
         setProgress(message,
                     detail = 'This may take a while...',
                     value=i)
-        Sys.sleep(0.1)
+        Sys.sleep(0.05)
       }
     })
   }
@@ -28,19 +29,20 @@ server <- function(input, output) {
   observe({
 
     rv$varnameComplete <- TRUE
+    
     output$tableVarNames <- renderDataTable({ 
       
       loadingFunc(message = "Initializing variables loading...")
       varnames <- readRDS("www/varnames.RDS")
-      varnames}, 
-      options = list(pageLength=10))
+      varnames}, options = list(pageLength=10)
+    )
   
     output$varnameComplete <- reactive({
       return(rv$varnameComplete)
     })
     
     outputOptions(output, 'varnameComplete', suspendWhenHidden=FALSE)
-    })
+  })
   
   blueprint <- readRDS("www/blueprint_mod.RDS")
   studyTest <- readRDS("www/df_test.RDS")
@@ -115,6 +117,7 @@ server <- function(input, output) {
     }
     
     if (!"Total_MACE" %in% names(dataset)){
+      
       noTarget <- TRUE
       f_col <- sample(c("No", "Yes"), nrow(dataset), replace = T)
       dataset$Total_MACE <- as.factor(f_col)
@@ -145,29 +148,43 @@ server <- function(input, output) {
       check_performance <- FALSE
       
     } 
-    
     check_performance
-    
   })
   
-  
-  output$performance <- renderPrint({
 
-    if (check_performance()){
-
-      h2o.performance(model(), newdata = data())
+  observe({
+    
+    if (input$predict_btn){
       
-    } else {
+      rv$perfComplete <- TRUE
+    
+      output$performance <- renderPrint({
       
-      cat(
-        "No performance assessment would be conducted due to unknown target variable
-in uploaded data file.
-please click on 'Table' tab to see prediction result."
-      )
-    }
+        if (check_performance()){
+          
+          loadingFunc(message = "Initializing performance summary...")
+          
+          h2o.performance(model(), newdata = data())
+          
+        } else {
+          
+          cat(
+            "No performance assessment would be conducted due to unknown target variable
+    in uploaded data file.
+    please click on 'Table' tab to see prediction result."
+             )
+          }
+        }) 
+        output$perfComplete <- reactive({
+          return(rv$perfComplete)
+        })
+        
+        outputOptions(output, 'perfComplete', suspendWhenHidden=FALSE)
+  }
   })
   
   predict_metrics <- reactive({
+    
     if (check_performance()){
       
       h2o.predict(model(), newdata = data())
@@ -184,12 +201,12 @@ please click on 'Table' tab to see prediction result."
     }
   })
   
-  
   observe({
     
     if (input$predict_btn){
     
       rv$predictTableComplete <- TRUE
+      
       output$predict_tbl <- renderDataTable({
       
         loadingFunc("Loading predictions table...")
@@ -208,24 +225,34 @@ please click on 'Table' tab to see prediction result."
   
   })
 
+  observe({
   
-  output$predict_plot <- renderPlot({
-
-    if (check_performance()){
-      pred <- as.data.frame(predict_metrics())
+      if (input$predict_btn){
+        rv$perfPlot <- TRUE
+        
+        output$predict_plot <- renderPlot({
+          if (check_performance()){
+          
+              loadingFunc(message = "initiating smoothing ROC plot...")
+              pred <- as.data.frame(predict_metrics())
+              
+              df <- as.data.frame(data())
+        
+              ggroc(roc(df$Total_MACE, pred$Yes,
+                  ci=T, smooth=T, smooth.n=10,
+                  auc=T), legacy.axes = T, color="red") + 
+                  xlab("1-Specificity") + ylab("Sensitivity")+
+                  geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
+                               linetype = 2,col='black',
+                               lwd=0.05) 
+          }
+        }, width="auto", height = "auto", res = 96)
+        
+      output$perfPlot <- reactive({
+        return(rv$perfPlot)
+      })
       
-      df <- as.data.frame(data())
-
-      loadingFunc(message = "initiating smoothing ROC plot...")
-      
-      ggroc(roc(df$Total_MACE, pred$Yes,
-          ci=T, smooth=T, smooth.n=10,
-          auc=T), legacy.axes = T, color="red") + 
-          xlab("1-Specificity") + ylab("Sensitivity")+
-          geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
-                       linetype = 2,col='black',
-                       lwd=0.05) 
-    }
-
-  },width="auto", height = "auto", res = 96)
-}
+      outputOptions(output, 'perfPlot', suspendWhenHidden=FALSE)
+  }
+  })
+  }

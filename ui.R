@@ -308,14 +308,26 @@ body <- dashboardBody(
                                   prediction")),
                          
                          actionButton("predict_btn", label = "Predict...", 
-                                      width = "100px"),
-                         br(),
-                         br(),
-                         verbatimTextOutput('performance'),
+                                      width = "100px"))),
+                
+                         conditionalPanel(condition = "output.perfComplete",
+                                          fluidRow(box(title=strong("Performance Summary"),  
+                                                       id="perfSummary",width=12,
+                                                       status="primary", 
+                                                       collapsible = T, 
+                                                       collapsed = F,
+                                                       verbatimTextOutput('performance')))  
                          ),
-                         br()
-                         )
-            ),
+                         conditionalPanel(condition = "!output.perfComplete",
+                                          fluidRow(box(title=strong("Performance Summary"),  
+                                                       id="perfSummary",width=12,
+                                                       status="primary", 
+                                                       collapsible = T, 
+                                                       collapsed = F,
+                                                       "Waiting for performance results..."))  
+                         ),
+                         ),
+            
     
             tabPanel("Table",
             
@@ -339,14 +351,16 @@ body <- dashboardBody(
                 conditionalPanel(condition = "output.predictTableComplete",
                                  fluidRow(box(title=strong("Table"),  
                                               id="predictTable",width=12,
-                                              status="primary", collapsible = T, collapsed = F,
+                                              status="primary", collapsible = T, 
+                                              collapsed = F,
                                               dataTableOutput("predict_tbl")))  
                 ),
                 conditionalPanel(condition = "!output.predictTableComplete",
                                  fluidRow(box(title=strong("Table"),
                                               id="predictTable",width=12,
-                                              status="primary", collapsible = T, collapsed = F,
-                                              "Loading predictions table, It
+                                              status="primary", collapsible = T, 
+                                              collapsed = F,
+                                              "Waiting for predictions table, It
                                               may take a while..."))
                 ),
                 ),
@@ -357,21 +371,35 @@ body <- dashboardBody(
                              status="primary", collapsible = T, collapsed = F,
                              "If your dataset contains target variable named
                              Total_MACE, ROC curve would be provided.", 
-                             plotOutput("predict_plot")))       
-                )
+                             )),
+                
+                conditionalPanel(condition = "output.perfPlot",
+                                 fluidRow(box(title=strong("Plot"),  
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T, 
+                                              collapsed = F,
+                                              plotOutput("predict_plot")))  
+                ),
+                conditionalPanel(condition = "!output.perfPlot",
+                                 fluidRow(box(title=strong("Plot"),
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T, 
+                                              collapsed = F,
+                                              "Waiting for Performance Plot, It
+                                              may take a while..."))
+                ),
+            ),
         )),
     
     tabItem(tabName = "contact",
             fluidRow(box(width=12, status = "primary",
             div(p(span("Contact:", style="font-weight:bold; font-size:24px;")), 
-                hr(),
                 style="width:80%; margin-top:0px; font-size:16px;"))
     )),
     
     tabItem(tabName = "about",
             fluidRow(box(width=12, status="primary",
             div(p(span("About", style="font-weight:bold; font-size:24px;")),
-                hr(),
                 style="width:80%; margin-top:0px; font-size:16px;"),
       ))
     )
