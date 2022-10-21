@@ -14,15 +14,12 @@ server <- function(input, output) {
   varnames <- readRDS("www/varnames.RDS")
   studyTest <- readRDS("www/df_test.RDS")
 
-
-  output$tableVarNames <- renderDataTable({varnames}, options = list(
-                                                              pageLength=10))
+  output$tableVarNames <- renderDataTable({varnames}, 
+                                          options = list(pageLength=10))
   
   h2o.init()
   h2o.no_progress()
- 
 
-  
   model <- eventReactive(input$predict_btn,{
 
     if (input$models == "RF"){
@@ -133,16 +130,13 @@ server <- function(input, output) {
       
     } else {
       
-      
       cat(
         "No performance assessment would be conducted due to unknown target variable
 in uploaded data file.
 please click on 'Table' tab to see prediction result."
-      
       )
     }
   })
-  
   
   predict_metrics <- reactive({
     if (check_performance()){
@@ -150,24 +144,20 @@ please click on 'Table' tab to see prediction result."
       h2o.predict(model(), newdata = data())
       
     } else {
-      fake_col <- as.h2o(data.frame(Total_MACE = as.factor(sample(c("No", "Yes"), 
-                                                                  nrow(data()), replace = T)),
+      fake_col <- as.h2o(data.frame(Total_MACE = as.factor(
+        sample(c("No", "Yes"),nrow(data()), replace = T)),
                                     stringsAsFactors = F))
       
       dataset_mod <- h2o.cbind(data(), fake_col)
       
       h2o.predict(model(), newdata = dataset_mod)
-      
     }
-    
   })
   
   output$predict_tbl <- renderDataTable({
     
     predict_metrics()
-    
   })
-  
   
   output$predict_plot <- renderPlot({
 
@@ -184,9 +174,7 @@ please click on 'Table' tab to see prediction result."
             geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
                          linetype = 2,col='black',
                          lwd=0.05) 
-        
     }
 
   },width="auto", height = "auto", res = 96)
-
 }
