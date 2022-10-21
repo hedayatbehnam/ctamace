@@ -10,13 +10,41 @@ library(ggplot2)
 
 server <- function(input, output) {
   
+  rv <- reactiveValues()
+  rv$varnameComplete <- rv$predictTableComplete <- FALSE
+    
+  loadingFunc <- function(message='Loading ...') { 
+      withProgress(min=1, max=15, expr={
+    
+      for(i in 1:15) {
+        setProgress(message,
+                    detail = 'This may take a while...',
+                    value=i)
+        Sys.sleep(0.1)
+      }
+    })
+  }
+    
+  observe({
+
+    rv$varnameComplete <- TRUE
+    output$tableVarNames <- renderDataTable({ 
+      
+      loadingFunc(message = "Initializing variables loading...")
+      varnames <- readRDS("www/varnames.RDS")
+      varnames}, 
+      options = list(pageLength=10))
+  
+    output$varnameComplete <- reactive({
+      return(rv$varnameComplete)
+    })
+    
+    outputOptions(output, 'varnameComplete', suspendWhenHidden=FALSE)
+    })
+  
   blueprint <- readRDS("www/blueprint_mod.RDS")
-  varnames <- readRDS("www/varnames.RDS")
   studyTest <- readRDS("www/df_test.RDS")
 
-  output$tableVarNames <- renderDataTable({varnames}, 
-                                          options = list(pageLength=10))
-  
   h2o.init()
   h2o.no_progress()
 
@@ -122,6 +150,7 @@ server <- function(input, output) {
     
   })
   
+  
   output$performance <- renderPrint({
 
     if (check_performance()){
@@ -155,26 +184,47 @@ please click on 'Table' tab to see prediction result."
     }
   })
   
-  output$predict_tbl <- renderDataTable({
+  
+  observe({
     
-    predict_metrics()
+    if (input$predict_btn){
+    
+      rv$predictTableComplete <- TRUE
+      output$predict_tbl <- renderDataTable({
+      
+        loadingFunc("Loading predictions table...")
+        
+        predict_metrics()
+        
+      })
+      
+      output$predictTableComplete <- reactive({
+        return(rv$predictTableComplete)
+      })
+      
+      outputOptions(output, 'predictTableComplete', suspendWhenHidden=FALSE)
+      
+    } 
+  
   })
+
   
   output$predict_plot <- renderPlot({
 
     if (check_performance()){
-
       pred <- as.data.frame(predict_metrics())
       
       df <- as.data.frame(data())
 
-        ggroc(roc(df$Total_MACE, pred$Yes,
-            ci=T, smooth=T, smooth.n=10,
-            auc=T), legacy.axes = T, color="red") + 
-            xlab("1-Specificity") + ylab("Sensitivity")+
-            geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
-                         linetype = 2,col='black',
-                         lwd=0.05) 
+      loadingFunc(message = "initiating smoothing ROC plot...")
+      
+      ggroc(roc(df$Total_MACE, pred$Yes,
+          ci=T, smooth=T, smooth.n=10,
+          auc=T), legacy.axes = T, color="red") + 
+          xlab("1-Specificity") + ylab("Sensitivity")+
+          geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
+                       linetype = 2,col='black',
+                       lwd=0.05) 
     }
 
   },width="auto", height = "auto", res = 96)

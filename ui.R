@@ -61,6 +61,20 @@ body <- dashboardBody(
                   width:80%;
                 }
                 
+                #loadmessage {
+                   position: fixed;
+                   top: 0px;
+                   left: 0px;
+                   width: 100%;
+                   padding: 5px 0px 5px 0px;
+                   text-align: center;
+                   font-weight: bold;
+                   font-size: 100%;
+                   color: #000000;
+                   background-color: #CCFF66;
+                   z-index: 105;
+                }
+                
                 @media only screen and (max-width:602px){
                 
                 .home-title {
@@ -147,40 +161,40 @@ body <- dashboardBody(
             
             fluidRow(box( width = 12, status = "primary",
             
-            div(p(span("Authors and Affiliations", style="font-weight:bold; 
-                  font-size:24px;")),hr(),
-                  "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
-                  "Amir Fazeli, MD", tags$sup("1"), br(),
-                  "Behnam Hedayat, MD", tags$sup("1"), br(),
-                  "Hamid Mokhtari, PhD", tags$sup("1"),br(),
-                  "Arash Jalali, PhD", tags$sup("1"),br(),
-                  "Pooria Ahmadi, MD", tags$sup("1"),br(),
-                  "Hamid Chalian, MD", tags$sup("3"),br(),
-                  "Nicola Luigi Bragazzi, MD, PhD",  tags$sup("4"),br(),
-                  "Shapour Shirani, MD", tags$sup("5"), br(),
-                  "Negar Omidi, MD", tags$sup("5*"), br(),
-                  hr(),
-
-                  "1. Tehran Heart Center, Tehran University of Medical Science, 
-                      Tehran, Iran.", br(),
-                  "2. Shahid Beheshti University of Medical Science, Tehran, 
-                      Iran.", br(),
-                  "3. Division of Cardiothoracic Imaging, Department of Radiology, 
-                      University of Washington, Seattle, Washington, USA.", br(),
-                  "4. Laboratory for industrial and applied mathematics (LIAM), 
-                      Department of mathematics and statistics, York university, 
-                      Toronto, Canada.",br(),
-                  "5. Department of Cardiovascular Imaging, Tehran Heart Center,
-                      Tehran University of Medical Sciences, Tehran, Iran.",
-                  br(),hr(),
-                  span("Correspondence:", style="font-weight:bold"),br(), 
-                       "Negar Omidi, ", br(), "Associate Professor Department of 
-                        Cardiovascular Imaging", br(),
-                        "Tehran Heart Center, ", br(), 
-                        "Tehran University of Medical Sciences,", br(),
-                        "Kargar St. Jalal al-Ahmad Cross, zip code: 1411713138, 
-                        Tehran, Iran.", 
-                  class="abstract-text")))),
+              div(p(span("Authors and Affiliations", style="font-weight:bold; 
+                    font-size:24px;")),hr(),
+                    "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
+                    "Amir Fazeli, MD", tags$sup("1"), br(),
+                    "Behnam Hedayat, MD", tags$sup("1"), br(),
+                    "Hamid Mokhtari, PhD", tags$sup("1"),br(),
+                    "Arash Jalali, PhD", tags$sup("1"),br(),
+                    "Pooria Ahmadi, MD", tags$sup("1"),br(),
+                    "Hamid Chalian, MD", tags$sup("3"),br(),
+                    "Nicola Luigi Bragazzi, MD, PhD",  tags$sup("4"),br(),
+                    "Shapour Shirani, MD", tags$sup("5"), br(),
+                    "Negar Omidi, MD", tags$sup("5*"), br(),
+                    hr(),
+  
+                    "1. Tehran Heart Center, Tehran University of Medical Science, 
+                        Tehran, Iran.", br(),
+                    "2. Shahid Beheshti University of Medical Science, Tehran, 
+                        Iran.", br(),
+                    "3. Division of Cardiothoracic Imaging, Department of Radiology, 
+                        University of Washington, Seattle, Washington, USA.", br(),
+                    "4. Laboratory for industrial and applied mathematics (LIAM), 
+                        Department of mathematics and statistics, York university, 
+                        Toronto, Canada.",br(),
+                    "5. Department of Cardiovascular Imaging, Tehran Heart Center,
+                        Tehran University of Medical Sciences, Tehran, Iran.",
+                    br(),hr(),
+                    span("Correspondence:", style="font-weight:bold"),br(), 
+                         "Negar Omidi, ", br(), "Associate Professor Department of 
+                          Cardiovascular Imaging", br(),
+                          "Tehran Heart Center, ", br(), 
+                          "Tehran University of Medical Sciences,", br(),
+                          "Kargar St. Jalal al-Ahmad Cross, zip code: 1411713138, 
+                          Tehran, Iran.", 
+                    class="abstract-text")))),
     
     tabItem(tabName = "abstract", 
             
@@ -228,9 +242,10 @@ body <- dashboardBody(
     )),
   
     tabItem(tabName = "prediction",height = "100vh",
-            tabsetPanel(type="tabs",
+
+        tabsetPanel(type="tabs", id = "predictTabs",
                         
-            tabPanel("Introduction",
+            tabPanel("Introduction", 
             
                 fluidRow(box(width=12,status="primary",
                         div(p(span("Prediction Tool", style="font-weight:bold; 
@@ -251,12 +266,20 @@ body <- dashboardBody(
                           box bellow to enable prediction.", class="predict-text"),
                   
                 ))), br(),
-                
-                fluidRow(box(title=strong("Variables Names"),
-                         id="varnames",width=12,
-                         status="primary", collapsible = T, collapsed = F,
-                         dataTableOutput("tableVarNames"))    
-                )
+
+                conditionalPanel(condition = "output.varnameComplete",
+                       fluidRow(box(title=strong("Variables Names"),
+                                    id="varnames",width=12,
+                                    status="primary", collapsible = T, collapsed = F,
+                                    dataTableOutput("tableVarNames")))  
+                ),
+                conditionalPanel(condition = "!output.varnameComplete",
+                                 fluidRow(box(title=strong("Variables Names"),
+                                              id="varnames",width=12,
+                                              status="primary", collapsible = T, collapsed = F,
+                                              "Loading variables, It
+                                              may take a while..."))
+                ),
             ),
           
             tabPanel("Prediction",
@@ -289,45 +312,54 @@ body <- dashboardBody(
                          br(),
                          br(),
                          verbatimTextOutput('performance'),
-                        
                          ),
                          br()
                          )
-           ),
+            ),
     
-          tabPanel("Table",
+            tabPanel("Table",
             
-            fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
-                         status="primary", collapsible = T, collapsed = F,
-                         "Here, Prediction table with probability of 
-                         'No' event and 'Yes' event are provided. 
-                         Final prediction of Total_MACE is provided in first
-                         column.
-                         If your data file contains target variable named 
-                         Total_MACE, the cutoff for discriminating MACE-No vs
-                         MACE-Yes is calculated by maximum F1 score in training set 
-                         by default.
-                         If your data file does not contain target variable, 
-                         The cutoff for defining MACE vs No-MACE is calcluated
-                         by our study cutoff maximum F1 score of each model in 
-                         original training set.",
-                         "You can define which metrics should be used for 
-                         threshold assignment.")),
-            
-            fluidRow(box(title=strong("Table"), width=12, 
-                         status="primary", collapsible = T, collapsed = F,
-                         dataTableOutput("predict_tbl")))),
-            
-          tabPanel("Plots", 
+                fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
+                             status="primary", collapsible = T, collapsed = F,
+                             "Here, Prediction table with probability of 
+                             'No' event and 'Yes' event are provided. 
+                             Final prediction of Total_MACE is provided in first
+                             column.
+                             If your data file contains target variable named 
+                             Total_MACE, the cutoff for discriminating MACE-No vs
+                             MACE-Yes is calculated by maximum F1 score in training set 
+                             by default.
+                             If your data file does not contain target variable, 
+                             The cutoff for defining MACE vs No-MACE is calcluated
+                             by our study cutoff maximum F1 score of each model in 
+                             original training set.",
+                             "You can define which metrics should be used for 
+                             threshold assignment.")),
+
+                conditionalPanel(condition = "output.predictTableComplete",
+                                 fluidRow(box(title=strong("Table"),  
+                                              id="predictTable",width=12,
+                                              status="primary", collapsible = T, collapsed = F,
+                                              dataTableOutput("predict_tbl")))  
+                ),
+                conditionalPanel(condition = "!output.predictTableComplete",
+                                 fluidRow(box(title=strong("Table"),
+                                              id="predictTable",width=12,
+                                              status="primary", collapsible = T, collapsed = F,
+                                              "Loading predictions table, It
+                                              may take a while..."))
+                ),
+                ),
+              
+            tabPanel("Plots", 
                    
-            fluidRow(box(title=strong("Performance Plots"), width=12,
-                         status="primary", collapsible = T, collapsed = F,
-                         
-                         "If your dataset contains target variable named
-                         Total_MACE, ROC curve would be provided.", 
-                         plotOutput("predict_plot")))       
-            )
-          )),
+                fluidRow(box(title=strong("Performance Plots"), width=12,
+                             status="primary", collapsible = T, collapsed = F,
+                             "If your dataset contains target variable named
+                             Total_MACE, ROC curve would be provided.", 
+                             plotOutput("predict_plot")))       
+                )
+        )),
     
     tabItem(tabName = "contact",
             fluidRow(box(width=12, status = "primary",
