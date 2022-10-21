@@ -144,7 +144,8 @@ please click on 'Table' tab to see prediction result."
       h2o.predict(model(), newdata = data())
       
     } else {
-      fake_col <- as.h2o(data.frame(Total_MACE = as.factor(
+      
+      f_col <- as.h2o(data.frame(Total_MACE = as.factor(
         sample(c("No", "Yes"),nrow(data()), replace = T)),
                                     stringsAsFactors = F))
       
