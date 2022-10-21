@@ -25,7 +25,6 @@ body <- dashboardBody(
                           font-weight:bold;
                           font-size : 26px;
                           text-align:center;
-
                 }
                 
                 .home-box-title {
@@ -46,28 +45,21 @@ body <- dashboardBody(
 
                   margin-top:80px;
                   margin-bottom: 20px;
-                
                 }
                 
                 .thc-logo-text { 
-                
                   font-size:24px;
                   font-weight: bold;
-                
                 }
                 
                 .thc-logo-subtext {
-                
                   font-size:18px;
                   margin-bottom: 80px;
-
                 }
                 
                 .predict-text {
-                
                   font-size:17px;
                   width:80%;
-                
                 }
                 
                 @media only screen and (max-width:602px){
@@ -139,7 +131,7 @@ body <- dashboardBody(
            
              fluidRow(column(6,box(width=12 , background = "light-blue",
                                   tags$div("Using Seven Machine Learning Models to Predict 
-                                                                     Outcome in File Format of .RDS, .csv, .sav, .xlsx ",
+                                                                     Outcome in file format of .RDS, .csv, .sav, .xlsx ",
                                                                      class="home-box-title"))),
                      
                      column(6,box(width=12, background = "teal",
@@ -277,6 +269,7 @@ body <- dashboardBody(
                          verbatimTextOutput('performance'),
                         
                          ),
+                         verbatimTextOutput("check"),
                          
                          br()
                     
@@ -284,14 +277,22 @@ body <- dashboardBody(
 
            ),
     
-    
-    
           tabPanel("Table",
             
             fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
                          status="primary", collapsible = T, collapsed = F,
                          dataTableOutput("predict_tbl"))
-          )))),
+          )),
+          
+          tabPanel("Plots", 
+                   
+            fluidRow(box(title=strong("Performance Plots"), width=12,
+                         status="primary", collapsible = T, collapsed = F,
+                         plotOutput("predict_plot")))       
+                   
+            )
+          
+          )),
     
     
     tabItem(tabName = "contact",box(width=12, status = "primary",
@@ -304,9 +305,8 @@ body <- dashboardBody(
             div(p(span("About", style="font-weight:bold; font-size:24px;")), hr(),
                 style="width:80%; margin-top:0px; font-size:16px;"),
             
-)
+      )
     )
-    
   )
 )
 

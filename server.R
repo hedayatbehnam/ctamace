@@ -5,6 +5,8 @@ library(readxl)
 library(h2o)
 library(recipes)
 library(tools)
+library(pROC)
+library(ggplot2)
 
 server <- function(input, output) {
   
@@ -12,36 +14,31 @@ server <- function(input, output) {
   varnames <- readRDS("www/varnames.RDS")
   studyTest <- readRDS("www/df_test.RDS")
 
+
   output$tableVarNames <- renderDataTable({varnames}, options = list(
                                                               pageLength=10))
   
-  h2o.init(max_mem_size = "1G", nthreads = 2)
+  h2o.init()
   h2o.no_progress()
  
-  rf_model <- h2o.loadModel("www/rf_grid1_model_20")
-  ensGlm_model <- h2o.loadModel("www/ensembledModel_glm")
-  ensNb_model <- h2o.loadModel("www/ensembledModel_nb")
-  gbm_model <- h2o.loadModel("www/gbm_grid1_model_33")
-  glm_model <- h2o.loadModel("www/glm_grid1_model_2")
-  fnn_model <- h2o.loadModel("www/fnn_grid1_model_17")
-  xgboost_model <- h2o.loadModel("www/xgb_grid1_model_38")
+
   
   model <- eventReactive(input$predict_btn,{
 
     if (input$models == "RF"){
-      selected_model <- rf_model
+      selected_model <- h2o.loadModel("www/rf_grid1_model_20")
     } else if (input$models == "Ensemble GLM"){
-      selected_model <- ensGlm_model
+      selected_model <- h2o.loadModel("www/ensembledModel_glm")
     } else if (input$models == "Ensemble NB"){
-      selected_model <- ensNb_model
+      selected_model <- h2o.loadModel("www/ensembledModel_nb")
     } else if (input$models == "GBM"){
-      selected_model <- gbm_model
+      selected_model <- h2o.loadModel("www/gbm_grid1_model_33")
     } else if (input$models == "GLM LR Ridge"){
-      selected_model <- glm_model
+      selected_model <- h2o.loadModel("www/glm_grid1_model_2")
     } else if (input$models == "FNN"){
-      selected_model <- fnn_model
+      selected_model <- h2o.loadModel("www/fnn_grid1_model_17")
     } else if (input$models == "Xgboost"){
-      selected_model <- xgboost_model
+      selected_model <- h2o.loadModel("www/xgb_grid1_model_38")
     } 
     selected_model
   })
@@ -62,8 +59,9 @@ server <- function(input, output) {
     ext <- tools::file_ext(loadedFile$datapath)
     
     req(loadedFile)
-  
-    validate(need(tolower(ext) %in% c("csv", "rds", "xlsx", "sav"), "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
+    
+    validate(need(tolower(ext) %in% c("csv", "rds", "xlsx", "sav"), 
+                  "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
       
     if (tolower(ext) == "rds"){
       
@@ -133,35 +131,62 @@ server <- function(input, output) {
 
       h2o.performance(model(), newdata = data())
       
+    } else {
+      
+      
+      cat(
+        "No performance assessment would be conducted due to unknown target variable
+in uploaded data file.
+please click on 'Table' tab to see prediction result."
+      
+      )
     }
   })
   
-  output$predict_tbl <- renderDataTable({
-    
+  
+  predict_metrics <- reactive({
     if (check_performance()){
-
+      
       h2o.predict(model(), newdata = data())
       
     } else {
       fake_col <- as.h2o(data.frame(Total_MACE = as.factor(sample(c("No", "Yes"), 
-                                          nrow(data()), replace = T)),
-                                          stringsAsFactors = F))
+                                                                  nrow(data()), replace = T)),
+                                    stringsAsFactors = F))
       
       dataset_mod <- h2o.cbind(data(), fake_col)
-      
-      output$performance <- renderText({
-        "No performance assessment was conducted due to unknown target variable
-in uploaded data file.
-please click on 'Table' tab to see prediction result."
-      })
       
       h2o.predict(model(), newdata = dataset_mod)
       
     }
+    
+  })
+  
+  output$predict_tbl <- renderDataTable({
+    
+    predict_metrics()
+    
   })
   
   
-  
+  output$predict_plot <- renderPlot({
 
-  
+    if (check_performance()){
+
+      pred <- as.data.frame(predict_metrics())
+      
+      df <- as.data.frame(data())
+
+        ggroc(roc(df$Total_MACE, pred$Yes,
+            ci=T, smooth=T, smooth.n=10,
+            auc=T), legacy.axes = T, color="red") + 
+            xlab("1-Specificity") + ylab("Sensitivity")+
+            geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
+                         linetype = 2,col='black',
+                         lwd=0.05) 
+        
+    }
+
+  },width="auto", height = "auto", res = 96)
+
 }
