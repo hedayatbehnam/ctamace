@@ -40,7 +40,6 @@ body <- dashboardBody(
                   font-size:17px;
                 }
                 
-                
                 img {
 
                   margin-top:80px;
@@ -122,14 +121,13 @@ body <- dashboardBody(
                          Prediction of MACE Using Coronary Multidetector 
                          Computed Tomography Anatomical Findings and Clinical Features", class="home-title"))))),
             
-            
             fluidRow(width=12, solidHeader = F,
                 column(12, align="center",tags$div(img(src='logothc.png', align = "center", width=200
                                                         ),br(),
                                                    p("Tehran Heart Center", class="thc-logo-text"),
                                                    p("Artificial Intelligence Division", class="thc-logo-subtext")))),
            
-             fluidRow(column(6,box(width=12 , background = "light-blue",
+            fluidRow(column(6,box(width=12 , background = "light-blue",
                                   tags$div("Using Seven Machine Learning Models to Predict 
                                                                      Outcome in file format of .RDS, .csv, .sav, .xlsx ",
                                                                      class="home-box-title"))),
@@ -155,7 +153,6 @@ body <- dashboardBody(
                   "Nicola Luigi Bragazzi, MD, PhD",  tags$sup("4"),br(),
                   "Shapour Shirani, MD", tags$sup("5"), br(),
                   "Negar Omidi, MD", tags$sup("5*"), br(),
-
                   hr(),
 
                   "1. Tehran Heart Center, Tehran University of Medical Science, Tehran, Iran.", br(),
@@ -260,18 +257,13 @@ body <- dashboardBody(
                          actionButton("predict_btn", label = "Predict...", width = "100px"),
                          
                          br(),
-                         
                          br(),
                              
                          verbatimTextOutput('performance'),
                         
                          ),
-                         verbatimTextOutput("check"),
-                         
                          br()
-                    
                          )
-
            ),
     
           tabPanel("Table",
@@ -286,9 +278,7 @@ body <- dashboardBody(
             fluidRow(box(title=strong("Performance Plots"), width=12,
                          status="primary", collapsible = T, collapsed = F,
                          plotOutput("predict_plot")))       
-                   
             )
-          
           )),
     
     tabItem(tabName = "contact",box(width=12, status = "primary",
@@ -299,7 +289,6 @@ body <- dashboardBody(
     tabItem(tabName = "about",box(width=12, status="primary",
             div(p(span("About", style="font-weight:bold; font-size:24px;")), hr(),
                 style="width:80%; margin-top:0px; font-size:16px;"),
-            
       )
     )
   )
