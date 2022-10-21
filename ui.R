@@ -143,7 +143,7 @@ body <- dashboardBody(
             box( width = 12, status = "primary",
             
             div(p(span("Authors and Affiliations", style="font-weight:bold; font-size:24px;")),hr(),
-                  "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
+                  "Seyyed Mojtaba Ghorashi ","MD-MPH", tags$sup("1"),br(),
                   "Amir Fazeli, MD", tags$sup("1"), br(),
                   "Behnam Hedayat, MD", tags$sup("1"), br(),
                   "Hamid Mokhtari, PhD", tags$sup("1"),br(),
