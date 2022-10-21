@@ -205,78 +205,96 @@ body <- dashboardBody(
     tabItem(tabName = "prediction",height = "100vh",
             tabsetPanel(type="tabs",
                         
-            tabPanel("Introduction",
+          tabPanel("Introduction",
             
-                fluidRow(box(width=12,status="primary",
-                             div(p(span("Prediction Tool", style="font-weight:bold; font-size:24px;")), hr(),
-                          p("Here a prediction tool is provided based on seven machine 
-                          learning models trained on patients
-                          which underwent elective coronary MDCT, to predict major 
-                          cardiovascular event (MACE) with using 
-                          coronary MDCT anatomical features combined with clinical features.
-                          ", class="predict-text"), 
-                          
-                          p("You can upload your custom file from file input box bellow. 
-                          At the moment Allowed format is *.rds, *.csv, *.sav and *.xlsx formats.", class="predict-text"),
-                          p("Because the models have been trained with specific names 
-                          of features, your dataset 
-                          features names should be transformed to the names provided in 
-                          'Variables Names' box bellow to 
-                          enable prediction.", class="predict-text"),
-                  
-                ))), br(),
+              fluidRow(box(width=12,status="primary",
+                           div(p(span("Prediction Tool", style="font-weight:bold; font-size:24px;")), hr(),
+                        p("Here a prediction tool is provided based on seven machine 
+                        learning models trained on patients
+                        which underwent elective coronary MDCT, to predict major 
+                        cardiovascular event (MACE) with using 
+                        coronary MDCT anatomical features combined with clinical features.
+                        ", class="predict-text"), 
+                        
+                        p("You can upload your custom file from file input box bellow. 
+                        At the moment Allowed format is *.rds, *.csv, *.sav and *.xlsx formats.", class="predict-text"),
+                        p("Because the models have been trained with specific names 
+                        of features, your dataset 
+                        features names should be transformed to the names provided in 
+                        'Variables Names' box bellow to 
+                        enable prediction.", class="predict-text"),
                 
-                fluidRow(box(title=strong("Variables Names"),
-                         id="varnames",width=12,
-                         status="primary", collapsible = T, collapsed = F,
-                         dataTableOutput("tableVarNames"))    
-                )
-            
+              ))), br(),
+              
+              fluidRow(box(title=strong("Variables Names"),
+                       id="varnames",width=12,
+                       status="primary", collapsible = T, collapsed = F,
+                       dataTableOutput("tableVarNames"))    
+              )
             ),
           
-            tabPanel("Prediction",
+          tabPanel("Prediction",
                      
-                fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
-                             collapsible = T, collapsed = F,
-                         p("You can upload your data with *.rds, *.csv, *.sav or 
-                          *.xlsx formats. 
-                          If you do not upload a file, a new sample test set
-                          with known target variable
-                           would be used for prediction as default.", class="predict-text"),
-                         
-                         fileInput("loadFile", label = "Please Upload Your Data:",
-                                   width="300px"),
-                         
-                         selectInput("models", "Please Select a Model", 
-                                     choices = c("RF", "Ensemble GLM", "Ensemble NB", 
-                                                 "GBM", "GLM LR Ridge", "FNN", "Xgboost"), 
-                                     selected = "RF", width = '200px'),
+              fluidRow(box(title=strong("Upload File"),width=12, status = "primary",
+                           collapsible = T, collapsed = F,
+                       p("You can upload your data with *.rds, *.csv, *.sav or 
+                        *.xlsx formats. 
+                        If you do not upload a file, a new sample test set
+                        with known target variable
+                         would be used for prediction as default.", class="predict-text"),
+                       
+                       fileInput("loadFile", label = "Please Upload Your Data:",
+                                 width="300px"),
+                       
+                       selectInput("models", "Please Select a Model", 
+                                   choices = c("RF", "Ensemble GLM", "Ensemble NB", 
+                                               "GBM", "GLM LR Ridge", "FNN", "Xgboost"), 
+                                   selected = "RF", width = '200px'),
+                    
+                       p(strong("Click predict... button bellow to initiate prediction")),
+                       
+                       actionButton("predict_btn", label = "Predict...", width = "100px"),
+                       
+                       br(),
+                       br(),
+                           
+                       verbatimTextOutput('performance'),
                       
-                         p(strong("Click predict... button bellow to initiate prediction")),
-                         
-                         actionButton("predict_btn", label = "Predict...", width = "100px"),
-                         
-                         br(),
-                         br(),
-                             
-                         verbatimTextOutput('performance'),
-                        
-                         ),
-                         br()
-                         )
+                       ),
+                       br()
+                       )
            ),
     
           tabPanel("Table",
             
             fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
                          status="primary", collapsible = T, collapsed = F,
-                         dataTableOutput("predict_tbl"))
-          )),
-          
+                         "Here, Prediction table with probability of 
+                         'No' event and 'Yes' event are provided. 
+                         Final prediction of Total_MACE is provided in first
+                         column.
+                         If your data file contains target variable named 
+                         Total_MACE, the cutoff for discriminating MACE-No vs
+                         MACE-Yes is calculated by maximum F1 score in training set 
+                         by default.
+                         If your data file does not contain target variable, 
+                         The cutoff for defining MACE vs No-MACE is calcluated
+                         by our study cutoff maximum F1 score of each model in 
+                         original training set.",
+                         "You can define which metrics should be used for 
+                         threshold assignment.")),
+            
+            fluidRow(box(title=strong("Table"), width=12, 
+                         status="primary", collapsible = T, collapsed = F,
+                         dataTableOutput("predict_tbl")))),
+            
           tabPanel("Plots", 
                    
             fluidRow(box(title=strong("Performance Plots"), width=12,
                          status="primary", collapsible = T, collapsed = F,
+                         
+                         "If your dataset contains target variable named
+                         Total_MACE, ROC curve would be provided.", 
                          plotOutput("predict_plot")))       
             )
           )),
