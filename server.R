@@ -244,9 +244,9 @@ server <- function(input, output) {
                   xlab("1-Specificity") + ylab("Sensitivity")+
                   geom_segment(aes(x=0,y=0,xend = 1, yend = 1),
                                linetype = 2,col='black',
-                               lwd=0.05) 
+                               lwd=0.05)
           }
-        }, width="auto", height = "auto", res = 96)
+        }, width=600, height = 500, res = 96)
         
       output$perfPlot <- reactive({
         return(rv$perfPlot)

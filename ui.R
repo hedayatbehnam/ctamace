@@ -241,7 +241,7 @@ body <- dashboardBody(
                   than clinical characteristics.", class="abstract-text"))
     )),
   
-    tabItem(tabName = "prediction",height = "100vh",
+    tabItem(tabName = "prediction",
 
         tabsetPanel(type="tabs", id = "predictTabs",
                         
@@ -309,31 +309,31 @@ body <- dashboardBody(
                          
                          actionButton("predict_btn", label = "Predict...", 
                                       width = "100px"))),
-                
-                         conditionalPanel(condition = "output.perfComplete",
-                                          fluidRow(box(title=strong("Performance Summary"),  
-                                                       id="perfSummary",width=12,
-                                                       status="primary", 
-                                                       collapsible = T, 
-                                                       collapsed = F,
-                                                       verbatimTextOutput('performance')))  
-                         ),
-                         conditionalPanel(condition = "!output.perfComplete",
-                                          fluidRow(box(title=strong("Performance Summary"),  
-                                                       id="perfSummary",width=12,
-                                                       status="primary", 
-                                                       collapsible = T, 
-                                                       collapsed = F,
-                                                       "Waiting for performance results..."))  
-                         ),
-                         ),
+        
+                conditionalPanel(condition = "output.perfComplete",
+                                  fluidRow(box(title=strong("Performance Summary"),  
+                                               id="perfSummary",width=12,
+                                               status="primary", 
+                                               collapsible = T, 
+                                               collapsed = F,
+                                               verbatimTextOutput('performance')))  
+                ),
+                conditionalPanel(condition = "!output.perfComplete",
+                                  fluidRow(box(title=strong("Performance Summary"),  
+                                               id="perfSummary",width=12,
+                                               status="primary", 
+                                               collapsible = T, 
+                                               collapsed = F,
+                                               "Waiting for performance results..."))  
+                ),
+            ),
             
     
             tabPanel("Table",
             
                 fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
                              status="primary", collapsible = T, collapsed = F,
-                             "Here, Prediction table with probability of 
+                             p("Here, Prediction table with probability of 
                              'No' event and 'Yes' event are provided. 
                              Final prediction of Total_MACE is provided in first
                              column.
@@ -346,7 +346,7 @@ body <- dashboardBody(
                              by our study cutoff maximum F1 score of each model in 
                              original training set.",
                              "You can define which metrics should be used for 
-                             threshold assignment.")),
+                             threshold assignment.", class="predict-text"))),
 
                 conditionalPanel(condition = "output.predictTableComplete",
                                  fluidRow(box(title=strong("Table"),  
@@ -363,22 +363,23 @@ body <- dashboardBody(
                                               "Waiting for predictions table, It
                                               may take a while..."))
                 ),
-                ),
+            ),
               
             tabPanel("Plots", 
-                   
+                
                 fluidRow(box(title=strong("Performance Plots"), width=12,
                              status="primary", collapsible = T, collapsed = F,
                              "If your dataset contains target variable named
-                             Total_MACE, ROC curve would be provided.", 
-                             )),
+                             Total_MACE, ROC curve would be provided.",
+                             class="predict-text")),
                 
                 conditionalPanel(condition = "output.perfPlot",
                                  fluidRow(box(title=strong("Plot"),  
                                               id="predictPlot",width=12,
+                                              height = 650,
                                               status="primary", collapsible = T, 
                                               collapsed = F,
-                                              plotOutput("predict_plot")))  
+                                              column(12, align="center", plotOutput("predict_plot"))))
                 ),
                 conditionalPanel(condition = "!output.perfPlot",
                                  fluidRow(box(title=strong("Plot"),
@@ -389,7 +390,8 @@ body <- dashboardBody(
                                               may take a while..."))
                 ),
             ),
-        )),
+        ),
+    ),
     
     tabItem(tabName = "contact",
             fluidRow(box(width=12, status = "primary",
@@ -400,11 +402,12 @@ body <- dashboardBody(
     tabItem(tabName = "about",
             fluidRow(box(width=12, status="primary",
             div(p(span("About", style="font-weight:bold; font-size:24px;")),
-                style="width:80%; margin-top:0px; font-size:16px;"),
-      ))
-    )
+                style="width:80%; margin-top:0px; font-size:16px;"))
+    ))
   )
 )
+  
+
 
 dashboardPage(
   skin = "purple",
