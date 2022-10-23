@@ -309,26 +309,10 @@ body <- dashboardBody(
                          
                          actionButton("predict_btn", label = "Predict...", 
                                       width = "100px"))),
-        
-                conditionalPanel(condition = "output.perfComplete",
-                                  fluidRow(box(title=strong("Performance Summary"),  
-                                               id="perfSummary",width=12,
-                                               status="primary", 
-                                               collapsible = T, 
-                                               collapsed = F,
-                                               verbatimTextOutput('performance')))  
-                ),
-                conditionalPanel(condition = "!output.perfComplete",
-                                  fluidRow(box(title=strong("Performance Summary"),  
-                                               id="perfSummary",width=12,
-                                               status="primary", 
-                                               collapsible = T, 
-                                               collapsed = F,
-                                               "Waiting for performance results..."))  
-                ),
+
+                uiOutput("performanceState"),
             ),
             
-    
             tabPanel("Table",
             
                 fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
@@ -407,8 +391,6 @@ body <- dashboardBody(
   )
 )
   
-
-
 dashboardPage(
   skin = "purple",
   dashboardHeader(title = "CTAMACE"),

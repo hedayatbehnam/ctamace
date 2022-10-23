@@ -11,7 +11,16 @@ library(ggplot2)
 server <- function(input, output) {
   
   rv <- reactiveValues()
-  rv$varnameComplete <- rv$predictTableComplete <- rv$perfComplete <- rv$perfPlot <- FALSE
+  rv$varnameComplete <- rv$predictTableComplete <- rv$perfPlot <- FALSE
+  
+  rv$perfMetrics <- 'empty'
+
+  output$perfMetrics <- reactive({
+    return(rv$perfMetrics)
+  })
+  
+  outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
+  
     
   loadingFunc <- function(message='Loading ...') { 
     
@@ -51,7 +60,7 @@ server <- function(input, output) {
   h2o.no_progress()
 
   model <- eventReactive(input$predict_btn,{
-
+    
     if (input$models == "RF"){
       selected_model <- h2o.loadModel("www/rf_grid1_model_20")
     } else if (input$models == "Ensemble GLM"){
@@ -138,7 +147,7 @@ server <- function(input, output) {
   })
   
   check_performance <- reactive({ 
-    
+
     if ("Total_MACE" %in% names(data())){
     
       check_performance <- TRUE
@@ -151,38 +160,61 @@ server <- function(input, output) {
     check_performance
   })
   
+  performance_result <- eventReactive(input$predict_btn, {
+    
+      rv$perfMetrics <- 'loading'
+      
+      output$perfMetrics <- reactive({
+        return(rv$perfMetrics)
+      })
+      
+      outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
+    
+      if (check_performance()){
+
+        h2o.performance(model(), newdata = data())
+        
+      } else {
+        
+        rv$perfMetrics <- "noTarget"
+        
+        output$perfMetrics <- reactive({
+          return(rv$perfMetrics)
+        })
+        
+        outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
+        
+        NULL
+      }
+      
+  })
 
   observe({
     
-    if (input$predict_btn){
+    if (!is.null(performance_result())){
+
+      loadingFunc(message = "Initializing performance summary...")
       
-      rv$perfComplete <- TRUE
-    
-      output$performance <- renderPrint({
+      output$performance <- renderDataTable({
       
-        if (check_performance()){
+          max_scores <- as.data.frame(performance_result()@metrics$max_criteria_and_metric_scores)
+
+          max_scores[which(names(max_scores) != "idx")]
+         
+      })
+      
+      rv$perfMetrics <- "complete"
+
+      output$perfMetrics <- reactive({
+        return(rv$perfMetrics)
+      })
+
+      outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
           
-          loadingFunc(message = "Initializing performance summary...")
-          
-          h2o.performance(model(), newdata = data())
-          
-        } else {
-          
-          cat(
-            "No performance assessment would be conducted due to unknown target variable
-    in uploaded data file.
-    please click on 'Table' tab to see prediction result."
-             )
-          }
-        }) 
-        output$perfComplete <- reactive({
-          return(rv$perfComplete)
-        })
-        
-        outputOptions(output, 'perfComplete', suspendWhenHidden=FALSE)
-  }
-  })
+    } 
   
+  })
+
   predict_metrics <- reactive({
     
     if (check_performance()){
@@ -190,7 +222,6 @@ server <- function(input, output) {
       h2o.predict(model(), newdata = data())
       
     } else {
-      
       f_col <- as.h2o(data.frame(Total_MACE = as.factor(
         sample(c("No", "Yes"),nrow(data()), replace = T)),
                                     stringsAsFactors = F))
@@ -211,7 +242,7 @@ server <- function(input, output) {
       
         loadingFunc("Loading predictions table...")
         
-        predict_metrics()
+        as.data.frame(predict_metrics())
         
       })
       
@@ -222,7 +253,31 @@ server <- function(input, output) {
       outputOptions(output, 'predictTableComplete', suspendWhenHidden=FALSE)
       
     } 
+  })
   
+  output$no_target <- renderText({"Because your data file does not contains target variable called 
+                      Total_MACE, no performance assessment was conducted."})
+  output$loading <- renderText({'Loading performance metrics'})
+  
+  output[["performanceState"]] <- renderUI({
+    
+    perfStat <- NULL
+    if (rv$perfMetrics == 'empty'){
+      perfStat <- 'No file uploaded yet.'
+    } else if (rv$perfMetrics == 'loading'){
+      perfStat <- textOutput('loading')
+    } else if (rv$perfMetrics == 'complete'){
+      perfStat <- dataTableOutput('performance')
+    } else if (rv$perfMetrics == 'noTarget'){
+      perfStat <- textOutput("no_target")
+    }
+    
+    fluidRow(box(id="perfmet", title=strong("Performance Metrics"),  
+                  width=12,
+                  status="primary", 
+                  collapsible = T, 
+                  collapsed = F,
+                  perfStat))
   })
 
   observe({
@@ -246,7 +301,7 @@ server <- function(input, output) {
                                linetype = 2,col='black',
                                lwd=0.05)
           }
-        }, width=600, height = 500, res = 96)
+        }, width="auto", height = 500, res = 96)
         
       output$perfPlot <- reactive({
         return(rv$perfPlot)
