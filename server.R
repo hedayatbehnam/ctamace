@@ -8,33 +8,20 @@ library(tools)
 library(pROC)
 library(ggplot2)
 
+source('./init_h2o.R', local = T)
+source('modules/load_data.R', local = T)
+source('modules/loading_function.R', local=T)
+source('modules/upload_file.R', local= T)
+source('modules/check_performance.R', local=T)
+source('modules/reactiveVal_output.R', local=T)
+
 server <- function(input, output) {
   
   rv <- reactiveValues()
   rv$varnameComplete <- rv$predictTableComplete <- rv$perfPlot <- FALSE
   
-  rv$perfMetrics <- 'empty'
-
-  output$perfMetrics <- reactive({
-    return(rv$perfMetrics)
-  })
+  reactiveVal_output(rv, 'perfMetrics', 'empty', output)
   
-  outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
-  
-    
-  loadingFunc <- function(message='Loading ...') { 
-    
-      withProgress(min=1, max=15, expr={
-    
-      for(i in 1:15) {
-        setProgress(message,
-                    detail = 'This may take a while...',
-                    value=i)
-        Sys.sleep(0.05)
-      }
-    })
-  }
-    
   observe({
 
     rv$varnameComplete <- TRUE
@@ -53,164 +40,50 @@ server <- function(input, output) {
     outputOptions(output, 'varnameComplete', suspendWhenHidden=FALSE)
   })
   
-  blueprint <- readRDS("www/blueprint_mod.RDS")
-  studyTest <- readRDS("www/df_test.RDS")
-
-  h2o.init()
-  h2o.no_progress()
-
+  init_h2o()
+  
   model <- eventReactive(input$predict_btn,{
     
-    if (input$models == "RF"){
-      selected_model <- h2o.loadModel("www/rf_grid1_model_20")
-    } else if (input$models == "Ensemble GLM"){
-      selected_model <- h2o.loadModel("www/ensembledModel_glm")
-    } else if (input$models == "Ensemble NB"){
-      selected_model <- h2o.loadModel("www/ensembledModel_nb")
-    } else if (input$models == "GBM"){
-      selected_model <- h2o.loadModel("www/gbm_grid1_model_33")
-    } else if (input$models == "GLM LR Ridge"){
-      selected_model <- h2o.loadModel("www/glm_grid1_model_2")
-    } else if (input$models == "FNN"){
-      selected_model <- h2o.loadModel("www/fnn_grid1_model_17")
-    } else if (input$models == "Xgboost"){
-      selected_model <- h2o.loadModel("www/xgb_grid1_model_38")
-    } 
-    selected_model
+      load_data(input)
   })
   
   data <- reactive({
     
-    dataset <- NULL
-    noTarget <- FALSE
-    
-    if (is.null(input$loadFile$datapath)){
-
-      dataset <- loadedFile <- studyTest
-      
-    } else {
-      
-      loadedFile <- input$loadFile
-    
-    ext <- tools::file_ext(loadedFile$datapath)
-    
-    req(loadedFile)
-    
-    validate(need(tolower(ext) %in% c("csv", "rds", "xlsx", "sav"), 
-                  "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
-      
-    if (tolower(ext) == "rds"){
-      
-      dataset <- readRDS(loadedFile$datapath)
-      
-    } else if (tolower(ext) == "csv"){
-      
-      dataset <- read.csv(loadedFile$datapath)
-      
-    } else if (tolower(ext) == "sav") {
-      
-      dataset <- read.spss(loadedFile$datapath, to.data.frame = TRUE)
-      
-    } else if (tolower(ext) == "xlsx") {
-      
-      dataset <- read_excel(loadedFile$datapath)
-      
-    }
-      
-    validate(
-      
-      need(names(dataset) %in% names(studyTest), "At least one variable name
-      in uploaded dataset is not the same with original study train set variable names")
-    )
-    
-    }
-    
-    if (!"Total_MACE" %in% names(dataset)){
-      
-      noTarget <- TRUE
-      f_col <- sample(c("No", "Yes"), nrow(dataset), replace = T)
-      dataset$Total_MACE <- as.factor(f_col)
-    }
-
-    test_data <- prep(blueprint, training = dataset)
-    
-    test_data_j <- test_data %>% juice()
-    
-    if (noTarget){
-      test_data_j$Total_MACE <- NULL
-    }
-
-    test_data_h2o <- test_data_j %>% as.h2o()
-    
-    test_data_h2o
-  
+      upload_data(input)
   })
   
   check_performance <- reactive({ 
 
-    if ("Total_MACE" %in% names(data())){
-    
-      check_performance <- TRUE
-      
-    } else {
-      
-      check_performance <- FALSE
-      
-    } 
-    check_performance
+      check_perf(data)
   })
   
   performance_result <- eventReactive(input$predict_btn, {
-    
-      rv$perfMetrics <- 'loading'
       
-      output$perfMetrics <- reactive({
-        return(rv$perfMetrics)
-      })
-      
-      outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
+      # reactiveVal_output(rv, 'perfMetrics', 'loading', output)
     
       if (check_performance()){
 
         h2o.performance(model(), newdata = data())
-        
-      } else {
-        
-        rv$perfMetrics <- "noTarget"
-        
-        output$perfMetrics <- reactive({
-          return(rv$perfMetrics)
-        })
-        
-        outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
-        
-        NULL
       }
-      
   })
 
   observe({
     
     if (!is.null(performance_result())){
-
+  
       loadingFunc(message = "Initializing performance summary...")
       
       output$performance <- renderDataTable({
-      
-          max_scores <- as.data.frame(performance_result()@metrics$max_criteria_and_metric_scores)
 
-          max_scores[which(names(max_scores) != "idx")]
-         
+            max_scores <- as.data.frame(performance_result()@metrics$max_criteria_and_metric_scores)
+            max_scores[which(names(max_scores) != "idx")]
+
       })
+      reactiveVal_output(rv, 'perfMetrics', 'complete', output)
       
-      rv$perfMetrics <- "complete"
-
-      output$perfMetrics <- reactive({
-        return(rv$perfMetrics)
-      })
-
-      outputOptions(output, 'perfMetrics', suspendWhenHidden=F)
-          
+    } else {
+      
+            reactiveVal_output(rv, 'perfMetrics', 'noTarget', output)
     } 
   
   })
@@ -243,20 +116,20 @@ server <- function(input, output) {
         loadingFunc("Loading predictions table...")
         
         as.data.frame(predict_metrics())
-        
       })
       
       output$predictTableComplete <- reactive({
+        
         return(rv$predictTableComplete)
+      
       })
-      
       outputOptions(output, 'predictTableComplete', suspendWhenHidden=FALSE)
-      
     } 
   })
   
   output$no_target <- renderText({"Because your data file does not contains target variable called 
                       Total_MACE, no performance assessment was conducted."})
+  
   output$loading <- renderText({'Loading performance metrics'})
   
   output[["performanceState"]] <- renderUI({
