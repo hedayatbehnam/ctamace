@@ -1,6 +1,6 @@
 library(shiny)
 library(shinydashboard)
-source("style/style.R", local = T)
+source("styles/styles.R", local = T)
 
 sidebar <- dashboardSidebar(
 
