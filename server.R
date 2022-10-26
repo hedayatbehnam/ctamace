@@ -30,7 +30,7 @@ server <- function(input, output) {
       
       loadingFunc(message = "Initializing variables loading...")
       varnames <- readRDS("www/varnames.RDS")
-      varnames}, options = list(pageLength=10)
+      varnames}, options = list(pageLength=10, scrollX=TRUE)
     )
   
     output$varnameComplete <- reactive({
@@ -78,7 +78,7 @@ server <- function(input, output) {
             max_scores <- as.data.frame(performance_result()@metrics$max_criteria_and_metric_scores)
             max_scores[which(names(max_scores) != "idx")]
 
-      })
+      },options = list(scrollX = TRUE))
       reactiveVal_output(rv, 'perfMetrics', 'complete', output)
       
     } else {
@@ -116,7 +116,7 @@ server <- function(input, output) {
         loadingFunc("Loading predictions table...")
         
         as.data.frame(predict_metrics())
-      })
+      },options = list(scrollX = TRUE,...))
       
       output$predictTableComplete <- reactive({
         
