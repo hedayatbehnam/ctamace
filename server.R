@@ -26,7 +26,6 @@ server <- function(input, output) {
 
     rv$varnameComplete <- TRUE
     
-    
     output$tableVarNames <- renderDataTable({ 
       
       # loadingFunc(message = "Initializing variables loading...")
@@ -159,7 +158,6 @@ server <- function(input, output) {
         
         output$predict_plot <- renderPlot({
           if (check_performance()){
-          
               # loadingFunc(message = "initiating smoothing ROC plot...")
               pred <- as.data.frame(predict_metrics())
               

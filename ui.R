@@ -1,7 +1,6 @@
 library(shiny)
 library(shinydashboard)
 library(shinybusy)
-library(shinycssloaders)
 source("styles/styles.R", local = T)
 
 sidebar <- dashboardSidebar(
@@ -19,7 +18,9 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   
-  shinybusy::add_busy_spinner(spin = "half-circle", position = "bottom-right"),
+  shinybusy::add_busy_spinner(spin = "fading-circle", position = "bottom-right",
+                              margins = c("60%", "42%"), width = "60px",
+                              height = "60px"),
   style_ref(tags, "style"),
   tags$script(HTML("$('body').addClass('fixed');")),
   
@@ -60,7 +61,7 @@ body <- dashboardBody(
             
               div(p(span("Authors and Affiliations", style="font-weight:bold; 
                     font-size:24px;")),hr(),
-                    "Seyyed Mojtaba Ghorashisup ","MD-MPH", tags$sup("1"),br(),
+                    "Seyyed Mojtaba Ghorashi"," MD-MPH", tags$sup("1"),br(),
                     "Amir Fazeli, MD", tags$sup("1"), br(),
                     "Behnam Hedayat, MD", tags$sup("1"), br(),
                     "Hamid Mokhtari, PhD", tags$sup("1"),br(),
@@ -168,8 +169,7 @@ body <- dashboardBody(
                        fluidRow(box(title=strong("Variables Names"),
                                     id="varnames",width=12,
                                     status="primary", collapsible = T, collapsed = F,
-                                    shinycssloaders::withSpinner(
-                                      dataTableOutput("tableVarNames")))) 
+                                    dataTableOutput("tableVarNames")))
                 ),
                 conditionalPanel(condition = "!output.varnameComplete",
                                  fluidRow(box(title=strong("Variables Names"),
@@ -212,7 +212,7 @@ body <- dashboardBody(
             ),
             
             tabPanel("Table",
-            
+                
                 fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
                              status="primary", collapsible = T, collapsed = F,
                              p("Here, Prediction table with probability of 
@@ -229,14 +229,27 @@ body <- dashboardBody(
                              original training set.",
                              "You can define which metrics should be used for 
                              threshold assignment.", class="predict-text"))),
+                
+                fluidRow(box(title = strong("Metrics"), 
+                             "Please Select a Metric for Classification Threshold",
+                             width=12, status = "primary",
+                             collapsible = T, collapsed = F, 
+                             selectInput("metrics_input", label = " ",
+                                         choices = c("F1 score", "F2 score", "f0point5",
+                                                     "Accuracy","Precision",
+                                                     "recall", "Specificity",
+                                                     "Absoulute_mcc",
+                                                     "TNR", "FNR", "FPR",
+                                                     "TPR"), selected = "F1 score", 
+                                                     width = '200px'))
+                ),
 
                 conditionalPanel(condition = "output.predictTableComplete",
                                  fluidRow(box(title=strong("Table"),  
                                               id="predictTable",width=12,
                                               status="primary", collapsible = T, 
                                               collapsed = F,
-                                              shinycssloaders::withSpinner(
-                                                dataTableOutput("predict_tbl")))) 
+                                              dataTableOutput("predict_tbl")))
                 ),
                 conditionalPanel(condition = "!output.predictTableComplete",
                                  fluidRow(box(title=strong("Table"),
@@ -263,8 +276,7 @@ body <- dashboardBody(
                                               status="primary", collapsible = T, 
                                               collapsed = F,
                                               column(12, align="center", 
-                                              shinycssloaders::withSpinner(
-                                                plotOutput("predict_plot")))))
+                                              plotOutput("predict_plot"))))
                 ),
                 conditionalPanel(condition = "!output.perfPlot",
                                  fluidRow(box(title=strong("Plot"),
