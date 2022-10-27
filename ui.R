@@ -1,5 +1,7 @@
 library(shiny)
 library(shinydashboard)
+library(shinybusy)
+library(shinycssloaders)
 source("styles/styles.R", local = T)
 
 sidebar <- dashboardSidebar(
@@ -17,6 +19,7 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   
+  shinybusy::add_busy_spinner(spin = "half-circle", position = "bottom-right"),
   style_ref(tags, "style"),
   tags$script(HTML("$('body').addClass('fixed');")),
   
@@ -165,7 +168,8 @@ body <- dashboardBody(
                        fluidRow(box(title=strong("Variables Names"),
                                     id="varnames",width=12,
                                     status="primary", collapsible = T, collapsed = F,
-                                    dataTableOutput("tableVarNames")))  
+                                    shinycssloaders::withSpinner(
+                                      dataTableOutput("tableVarNames")))) 
                 ),
                 conditionalPanel(condition = "!output.varnameComplete",
                                  fluidRow(box(title=strong("Variables Names"),
@@ -231,7 +235,8 @@ body <- dashboardBody(
                                               id="predictTable",width=12,
                                               status="primary", collapsible = T, 
                                               collapsed = F,
-                                              dataTableOutput("predict_tbl")))  
+                                              shinycssloaders::withSpinner(
+                                                dataTableOutput("predict_tbl")))) 
                 ),
                 conditionalPanel(condition = "!output.predictTableComplete",
                                  fluidRow(box(title=strong("Table"),
@@ -257,7 +262,9 @@ body <- dashboardBody(
                                               height = 650,
                                               status="primary", collapsible = T, 
                                               collapsed = F,
-                                              column(12, align="center", plotOutput("predict_plot"))))
+                                              column(12, align="center", 
+                                              shinycssloaders::withSpinner(
+                                                plotOutput("predict_plot")))))
                 ),
                 conditionalPanel(condition = "!output.perfPlot",
                                  fluidRow(box(title=strong("Plot"),

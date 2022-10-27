@@ -26,9 +26,10 @@ server <- function(input, output) {
 
     rv$varnameComplete <- TRUE
     
+    
     output$tableVarNames <- renderDataTable({ 
       
-      loadingFunc(message = "Initializing variables loading...")
+      # loadingFunc(message = "Initializing variables loading...")
       varnames <- readRDS("www/varnames.RDS")
       varnames}, options = list(pageLength=10, scrollX=TRUE)
     )
@@ -71,7 +72,7 @@ server <- function(input, output) {
     
     if (!is.null(performance_result())){
   
-      loadingFunc(message = "Initializing performance summary...")
+      # loadingFunc(message = "Initializing performance summary...")
       
       output$performance <- renderDataTable({
 
@@ -112,11 +113,9 @@ server <- function(input, output) {
       rv$predictTableComplete <- TRUE
       
       output$predict_tbl <- renderDataTable({
-      
-        loadingFunc("Loading predictions table...")
-        
+        # loadingFunc("Loading predictions table...")
         as.data.frame(predict_metrics())
-      },options = list(scrollX = TRUE,...))
+      },options = list(scrollX = TRUE))
       
       output$predictTableComplete <- reactive({
         
@@ -161,7 +160,7 @@ server <- function(input, output) {
         output$predict_plot <- renderPlot({
           if (check_performance()){
           
-              loadingFunc(message = "initiating smoothing ROC plot...")
+              # loadingFunc(message = "initiating smoothing ROC plot...")
               pred <- as.data.frame(predict_metrics())
               
               df <- as.data.frame(data())
