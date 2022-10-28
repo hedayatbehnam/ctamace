@@ -10,7 +10,6 @@ load_dependencies <- function(){
                    "tools",
                    "pROC",
                    "ggplot2")
-    
     invisible(lapply(libraries, library, character.only = TRUE))
     source('init_h2o.R')
     modulesPath <- 'modules/'

@@ -7,8 +7,7 @@ library(recipes)
 library(tools)
 library(pROC)
 library(ggplot2)
-
-source('modules/load_data.R', local = T)
+source('modules/load_model.R', local = T)
 source('modules/loading_function.R', local=T)
 source('modules/check_performance.R', local=T)
 source('modules/reactiveVal_output.R', local=T)
@@ -23,15 +22,12 @@ server <- function(input, output) {
   
   observe({
     rv$varnameComplete <- TRUE
-    
     output$tableVarNames <- renderDataTable({ 
-      
       loadingFunc(message = "Initializing variables loading...")
       varnames <- readRDS("www/varnames.RDS")
       varnames
       }, options = list(pageLength=10, scrollX=TRUE) 
     )
-  
     output$varnameComplete <- reactive({
       return(rv$varnameComplete)
     })
@@ -41,7 +37,7 @@ server <- function(input, output) {
   init_h2o()
 
   model <- eventReactive(input$predict_btn,{
-      load_data(input)
+      load_model(input)
   })
   
   data <- reactive({
@@ -61,35 +57,25 @@ server <- function(input, output) {
 
   observe({
     if (!is.null(performance_result())){
-  
       loadingFunc(message = "Initializing performance summary...")
-      
       output$performance <- renderDataTable({
-
             max_scores <- as.data.frame(performance_result()@metrics$max_criteria_and_metric_scores)
             max_scores[which(names(max_scores) != "idx")]
-
       },options = list(scrollX = TRUE))
       reactiveVal_output(rv, 'perfMetrics', 'complete', output)
-      
     } else {
-      
             reactiveVal_output(rv, 'perfMetrics', 'noTarget', output)
     } 
   })
 
   predict_metrics <- reactive({
     if (check_performance()){
-      
       h2o.predict(model(), newdata = data())
-      
     } else {
       f_col <- as.h2o(data.frame(Total_MACE = as.factor(
         sample(c("No", "Yes"),nrow(data()), replace = T)),
                                     stringsAsFactors = F))
-      
       dataset_mod <- h2o.cbind(data(), f_col)
-      
       h2o.predict(model(), newdata = dataset_mod)
     }
   })
@@ -101,7 +87,6 @@ server <- function(input, output) {
         loadingFunc("Loading predictions table...")
         as.data.frame(predict_metrics())
       },options = list(scrollX = TRUE))
-      
       output$predictTableComplete <- reactive({
         return(rv$predictTableComplete)
       })
@@ -126,7 +111,6 @@ server <- function(input, output) {
       } else if (rv$perfMetrics == 'noTarget'){
         perfStat <- textOutput("no_target")
       }
-      
       box(id="perfmet", title=strong("Performance Metrics"),  
                    width=12,
                    status="primary", 
@@ -139,14 +123,11 @@ server <- function(input, output) {
   observe({
       if (input$predict_btn){
         rv$perfPlot <- TRUE
-        
         output$predict_plot <- renderPlot({
           if (check_performance()){
               loadingFunc(message = "initiating smoothing ROC plot...")
               pred <- as.data.frame(predict_metrics())
-              
               df <- as.data.frame(data())
-        
               ggroc(roc(df$Total_MACE, pred$Yes,
                   ci=T, smooth=T, smooth.n=10,
                   auc=T), legacy.axes = T, color="red") + 
@@ -156,7 +137,6 @@ server <- function(input, output) {
                                lwd=0.05)
           }
         }, width="auto", height = 500, res = 96)
-        
       output$perfPlot <- reactive({
         return(rv$perfPlot)
       })

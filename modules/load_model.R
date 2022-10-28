@@ -1,6 +1,5 @@
-## Loading trained model on original study
-load_data <- function(input){
-  
+## Loading trained models on original study
+load_model <- function(input){
     if (input$models == "RF"){
       selected_model <- h2o.loadModel("models/rf_grid1_model_20")
     } else if (input$models == "Ensemble GLM"){
@@ -21,7 +20,6 @@ load_data <- function(input){
 
 ## upload blueprint of preprocessing methods during training main dataset
 blueprint <- readRDS("www/blueprint_mod.RDS")
-
 ## upload a sample test set by default when no file data uploaded
 studyTest <- readRDS("www/df_test.RDS")
 
