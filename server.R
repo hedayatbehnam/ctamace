@@ -8,70 +8,61 @@ library(tools)
 library(pROC)
 library(ggplot2)
 
-source('./init_h2o.R', local = T)
 source('modules/load_data.R', local = T)
 source('modules/loading_function.R', local=T)
-source('modules/upload_file.R', local= T)
 source('modules/check_performance.R', local=T)
 source('modules/reactiveVal_output.R', local=T)
+source('./init_h2o.R', local = T)
+source('modules/upload_file.R', local= T)
 
 server <- function(input, output) {
   
   rv <- reactiveValues()
   rv$varnameComplete <- rv$predictTableComplete <- rv$perfPlot <- FALSE
-  
   reactiveVal_output(rv, 'perfMetrics', 'empty', output)
   
   observe({
-
     rv$varnameComplete <- TRUE
     
     output$tableVarNames <- renderDataTable({ 
       
-      # loadingFunc(message = "Initializing variables loading...")
+      loadingFunc(message = "Initializing variables loading...")
       varnames <- readRDS("www/varnames.RDS")
-      varnames}, options = list(pageLength=10, scrollX=TRUE)
+      varnames
+      }, options = list(pageLength=10, scrollX=TRUE) 
     )
   
     output$varnameComplete <- reactive({
       return(rv$varnameComplete)
     })
-    
     outputOptions(output, 'varnameComplete', suspendWhenHidden=FALSE)
   })
   
   init_h2o()
-  
+
   model <- eventReactive(input$predict_btn,{
-    
       load_data(input)
   })
   
   data <- reactive({
-    
       upload_data(input)
   })
   
   check_performance <- reactive({ 
-
       check_perf(data)
   })
   
   performance_result <- eventReactive(input$predict_btn, {
-      
       # reactiveVal_output(rv, 'perfMetrics', 'loading', output)
-    
       if (check_performance()){
-
         h2o.performance(model(), newdata = data())
       }
   })
 
   observe({
-    
     if (!is.null(performance_result())){
   
-      # loadingFunc(message = "Initializing performance summary...")
+      loadingFunc(message = "Initializing performance summary...")
       
       output$performance <- renderDataTable({
 
@@ -85,11 +76,9 @@ server <- function(input, output) {
       
             reactiveVal_output(rv, 'perfMetrics', 'noTarget', output)
     } 
-  
   })
 
   predict_metrics <- reactive({
-    
     if (check_performance()){
       
       h2o.predict(model(), newdata = data())
@@ -106,20 +95,15 @@ server <- function(input, output) {
   })
   
   observe({
-    
     if (input$predict_btn){
-    
       rv$predictTableComplete <- TRUE
-      
       output$predict_tbl <- renderDataTable({
-        # loadingFunc("Loading predictions table...")
+        loadingFunc("Loading predictions table...")
         as.data.frame(predict_metrics())
       },options = list(scrollX = TRUE))
       
       output$predictTableComplete <- reactive({
-        
         return(rv$predictTableComplete)
-      
       })
       outputOptions(output, 'predictTableComplete', suspendWhenHidden=FALSE)
     } 
@@ -130,35 +114,35 @@ server <- function(input, output) {
   
   output$loading <- renderText({'Loading performance metrics'})
   
-  output[["performanceState"]] <- renderUI({
-    
-    perfStat <- NULL
-    if (rv$perfMetrics == 'empty'){
-      perfStat <- 'No file uploaded yet.'
-    } else if (rv$perfMetrics == 'loading'){
-      perfStat <- textOutput('loading')
-    } else if (rv$perfMetrics == 'complete'){
-      perfStat <- dataTableOutput('performance')
-    } else if (rv$perfMetrics == 'noTarget'){
-      perfStat <- textOutput("no_target")
-    }
-    
-    fluidRow(box(id="perfmet", title=strong("Performance Metrics"),  
-                  width=12,
-                  status="primary", 
-                  collapsible = T, 
-                  collapsed = F,
-                  perfStat))
+  observe({
+    output[["performanceState"]] <- renderUI({
+      perfStat <- NULL
+      if (rv$perfMetrics == 'empty'){
+        perfStat <- 'No data available yet.'
+      } else if (rv$perfMetrics == 'loading'){
+        perfStat <- textOutput('loading')
+      } else if (rv$perfMetrics == 'complete'){
+        perfStat <- dataTableOutput('performance')
+      } else if (rv$perfMetrics == 'noTarget'){
+        perfStat <- textOutput("no_target")
+      }
+      
+      box(id="perfmet", title=strong("Performance Metrics"),  
+                   width=12,
+                   status="primary", 
+                   collapsible = T, 
+                   collapsed = F,
+                   perfStat)
+    })
   })
 
   observe({
-  
       if (input$predict_btn){
         rv$perfPlot <- TRUE
         
         output$predict_plot <- renderPlot({
           if (check_performance()){
-              # loadingFunc(message = "initiating smoothing ROC plot...")
+              loadingFunc(message = "initiating smoothing ROC plot...")
               pred <- as.data.frame(predict_metrics())
               
               df <- as.data.frame(data())
@@ -176,8 +160,7 @@ server <- function(input, output) {
       output$perfPlot <- reactive({
         return(rv$perfPlot)
       })
-      
       outputOptions(output, 'perfPlot', suspendWhenHidden=FALSE)
-  }
+      }
   })
   }

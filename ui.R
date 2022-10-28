@@ -208,7 +208,7 @@ body <- dashboardBody(
                          actionButton("predict_btn", label = "Predict...", 
                                       width = "100px"))),
 
-                uiOutput("performanceState"),
+                fluidRow(uiOutput("performanceState")),
             ),
             
             tabPanel("Table",

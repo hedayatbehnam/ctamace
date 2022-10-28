@@ -1,3 +1,4 @@
+## Loading trained model on original study
 load_data <- function(input){
   
     if (input$models == "RF"){
@@ -17,7 +18,6 @@ load_data <- function(input){
     } 
     selected_model
 }
-
 
 ## upload blueprint of preprocessing methods during training main dataset
 blueprint <- readRDS("www/blueprint_mod.RDS")
