@@ -3,13 +3,13 @@ upload_data <- function(input){
     dataset <- NULL
     noTarget <- FALSE
     if (is.null(input$loadFile$datapath)){
-      dataset <- loadedFile <- studyTest #if no file is uploaded, sample test is used by default
+      dataset <- loadedFile <- studyTest # if no file is uploaded, sample test is used by default
     } else {
-      loadedFile <- input$loadFile  #read uploaded file in fileInput section
-      ext <- tools::file_ext(loadedFile$datapath) #detect file extension
+      loadedFile <- input$loadFile  # read uploaded file in fileInput section
+      ext <- tools::file_ext(loadedFile$datapath) # detect file extension
       req(loadedFile)
       validate(
-        #validating allowed file extensions
+        # validating allowed file extensions
         need(tolower(ext) %in% c("csv", "rds", "xlsx", "sav"), 
               "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
       if (tolower(ext) == "rds"){
@@ -20,7 +20,7 @@ upload_data <- function(input){
         dataset <- read.spss(loadedFile$datapath, to.data.frame = TRUE)
       } else if (tolower(ext) == "xlsx") {
         dataset <- read_excel(loadedFile$datapath)
-      }
+      } 
       validate(
         # validating if names of variables are the same with original study
         need(names(dataset) %in% names(studyTest), "At least one variable name

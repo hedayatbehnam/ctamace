@@ -1,3 +1,4 @@
+options(shiny.maxRequestSize=30*1024^2) 
 library(shiny)
 library(shinydashboard)
 library(foreign)
@@ -13,7 +14,6 @@ source('modules/check_performance.R', local=T)
 source('modules/reactiveVal_output.R', local=T)
 source('./init_h2o.R', local = T)
 source('modules/upload_file.R', local= T)
-
 server <- function(input, output) {
   
   rv <- reactiveValues()
@@ -64,7 +64,7 @@ server <- function(input, output) {
       },options = list(scrollX = TRUE))
       reactiveVal_output(rv, 'perfMetrics', 'complete', output)
     } else {
-            reactiveVal_output(rv, 'perfMetrics', 'noTarget', output)
+      reactiveVal_output(rv, 'perfMetrics', 'noTarget', output)
     } 
   })
 

@@ -1,0 +1,14 @@
+name: ctamace
+title: ctamace
+username:
+account: behnam-hedayat
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7318273
+bundleId: 6454292
+url: https://behnam-hedayat.shinyapps.io/ctamace/
+when: 1667059668.0011
+lastSyncTime: 1667059668.00115
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: testthis-testers.R
