@@ -56,16 +56,13 @@ server <- function(input, output, session) {
       }
     } else {
       
+      reactiveVal_output(rv, 'predMetrics', 'complete', output)
+      vars$predict_metrics <- h2o.predict(vars$model, newdata = vars$data$h2oData)
+      
       if (!vars$data$target){
         vars$performance_result <- h2o.performance(vars$model, newdata = vars$data$h2oData)
         vars$max_scores <- as.data.frame(vars$performance_result@metrics$max_criteria_and_metric_scores)
         vars$max_scores <- vars$max_scores[which(names(vars$max_scores) != "idx")]
-      } 
-
-      reactiveVal_output(rv, 'predMetrics', 'complete', output)
-      vars$predict_metrics <- h2o.predict(vars$model, newdata = vars$data$h2oData)
-
-      if (!vars$data$target){
         loadingFunc(message = "initializing ROC plot...")
         vars$pred <- as.data.frame(vars$predict_metrics)
         vars$df <- as.data.frame(vars$data$h2oData)
@@ -73,15 +70,16 @@ server <- function(input, output, session) {
       } else {
         reactiveVal_output(rv, 'perfMetrics', 'noTarget', output)
       }
-      }
     }
-  )
+  })
 
   output$predict_tbl <- renderDataTable({
     as.data.frame(vars$predict_metrics)
   })
 
-  output$performance <- renderDataTable({vars$max_scores})
+  output$performance <- renderDataTable({
+    vars$max_scores
+  })
   
   output$predict_plot <- renderPlot({
       ggroc(roc(vars$df$Total_MACE, vars$pred$Yes,
