@@ -17,7 +17,7 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
-  
+
   shinybusy::add_busy_spinner(spin = "fading-circle", position = "bottom-right",
                               margins = c("60%", "42%"), width = "60px",
                               height = "60px"),
@@ -186,10 +186,13 @@ body <- dashboardBody(
                          status = "primary",
                          collapsible = T, collapsed = F,
                          p("You can upload your data with *.rds, *.csv, *.sav or 
-                          *.xlsx formats. 
-                          If you do not upload a file, a new sample test set
-                          with known target variable
-                          would be used for prediction as default.", 
+                          *.xlsx formats. Please wait untill `Upload complete` 
+                          appears in blue bar under file input box. Based on 
+                          network connection and file volume, it may takes
+                          some times for uploading file to be completed.
+                          If you do not have a file to upload, you can download 
+                           sample new test set available in git repository of 
+                           ctamace app in git@github.com:hedayatbehnam/ctamace.git", 
                           class="predict-text"),
                          
                          fileInput("loadFile", label = "Please Upload Your Data:",
@@ -208,9 +211,41 @@ body <- dashboardBody(
                          actionButton("predict_btn", label = "Predict...", 
                                       width = "100px"))),
 
-                fluidRow(uiOutput("performanceState")),
+                # fluidRow(uiOutput("performanceState")),
+                  conditionalPanel(condition = "output.perfMetrics == 'complete'",
+                      fluidRow(box(id="perfmet", title=strong("Performance Metrics"),  
+                               width=12,
+                               status="primary", 
+                               collapsible = T, 
+                               collapsed = F,
+                               dataTableOutput('performance'))),
+                  ),
+                  
+                conditionalPanel(condition = "output.perfMetrics == 'noTarget'",
+                                 fluidRow(box(title=strong("Plot"),
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T,
+                                              collapsed = F,
+                                              "Because your data file does not contains target variable called 
+                                               Total_MACE, no performance assessment was conducted."))
+                ),
+                conditionalPanel(condition = "output.perfMetrics == 'empty'",
+                                 fluidRow(box(title=strong("Plot"),
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T,
+                                              collapsed = F,
+                                              "Please upload a data file..."))
+                ),
+                
+                conditionalPanel(condition = "output.perfMetrics == 'nonValid'",
+                                 fluidRow(box(title=strong("Plot"),
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T,
+                                              collapsed = F,
+                                              "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
+                ),
             ),
-            
+          
             tabPanel("Table",
                 
                 fluidRow(box(title=strong("Prediction Ouput Table"), width=12, 
@@ -241,23 +276,29 @@ body <- dashboardBody(
                                                      "Absoulute_mcc",
                                                      "TNR", "FNR", "FPR",
                                                      "TPR"), selected = "F1 score", 
-                                                     width = '200px'))
+                                                     width = '200px')),
                 ),
 
-                conditionalPanel(condition = "output.predictTableComplete",
-                                 fluidRow(box(title=strong("Table"),  
-                                              id="predictTable",width=12,
-                                              status="primary", collapsible = T, 
-                                              collapsed = F,
-                                              dataTableOutput("predict_tbl")))
+                conditionalPanel(condition = "output.predMetrics == 'complete'",
+                fluidRow(box(title=strong("Table"),  
+                            id="predictTable",width=12,
+                            status="primary", collapsible = T, 
+                            collapsed = F,
+                            dataTableOutput("predict_tbl")))
                 ),
-                conditionalPanel(condition = "!output.predictTableComplete",
+                conditionalPanel(condition = "output.predMetrics == 'empty'",
                                  fluidRow(box(title=strong("Table"),
                                               id="predictTable",width=12,
-                                              status="primary", collapsible = T, 
+                                              status="primary", collapsible = T,
                                               collapsed = F,
-                                              "Waiting for predictions table, It
-                                              may take a while..."))
+                                              "Please upload a data file..."))
+                ),
+                conditionalPanel(condition = "output.predMetrics == 'nonValid'",
+                                 fluidRow(box(title=strong("Table"),
+                                              id="predictTable",width=12,
+                                              status="primary", collapsible = T,
+                                              collapsed = F,
+                                              "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
                 ),
             ),
               
@@ -269,22 +310,37 @@ body <- dashboardBody(
                              Total_MACE, ROC curve would be provided.",
                              class="predict-text")),
                 
-                conditionalPanel(condition = "output.perfPlot",
-                                 fluidRow(box(title=strong("Plot"),  
-                                              id="predictPlot",width=12,
-                                              height = 650,
-                                              status="primary", collapsible = T, 
-                                              collapsed = F,
-                                              column(12, align="center", 
-                                              plotOutput("predict_plot"))))
+                conditionalPanel(condition = "output.perfMetrics == 'complete'",
+                fluidRow(box(title=strong("Plot"),  
+                            id="predictPlot",width=12,
+                            height = 650,
+                            status="primary", collapsible = T, 
+                            collapsed = F,
+                            column(12, align="center", 
+                            plotOutput("predict_plot"))))
                 ),
-                conditionalPanel(condition = "!output.perfPlot",
+                conditionalPanel(condition = "output.perfMetrics == 'noTarget'",
                                  fluidRow(box(title=strong("Plot"),
                                               id="predictPlot",width=12,
-                                              status="primary", collapsible = T, 
+                                              status="primary", collapsible = T,
                                               collapsed = F,
-                                              "Waiting for Performance Plot, It
-                                              may take a while..."))
+                                              "Because your data file does not contains target variable called 
+                                               Total_MACE, no performance assessment was conducted."))
+                ),
+                conditionalPanel(condition = "output.perfMetrics == 'empty'",
+                                 fluidRow(box(title=strong("Plot"),
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T,
+                                              collapsed = F,
+                                              "Please upload a data file..."))
+                ),
+                
+                conditionalPanel(condition = "output.perfMetrics == 'nonValid'",
+                                 fluidRow(box(title=strong("Plot"),
+                                              id="predictPlot",width=12,
+                                              status="primary", collapsible = T,
+                                              collapsed = F,
+                                              "Uploaded file shoud be in .csv, .rds, .xlsx or .sav format"))
                 ),
             ),
         ),
