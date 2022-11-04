@@ -8,10 +8,10 @@ library(recipes)
 library(tools)
 library(pROC)
 library(ggplot2)
+source('./init_h2o.R', local = T)
 source('modules/load_model.R', local = T)
 source('modules/loading_function.R', local=T)
 source('modules/reactiveVal_output.R', local=T)
-source('./init_h2o.R', local = T)
 source('modules/upload_file.R', local= T)
 
 server <- function(input, output, session) {
@@ -55,7 +55,7 @@ server <- function(input, output, session) {
       reactiveVal_output(rv, 'predMetrics', 'complete', output)
       vars$predict_metrics <- h2o.predict(vars$model, newdata = vars$data$h2oData)
       if (!vars$data$target){
-        vars$performance_result <- h2o.performance(vars$model, newdata = vars$data$h2oData)
+        vars$performance_result <- suppressWarnings(h2o.performance(vars$model, newdata = vars$data$h2oData))
         vars$max_scores <- as.data.frame(vars$performance_result@metrics$max_criteria_and_metric_scores)
         vars$max_scores <- vars$max_scores[which(names(vars$max_scores) != "idx")]
         loadingFunc(message = "initializing ROC plot...")
