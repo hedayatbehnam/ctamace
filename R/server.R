@@ -16,7 +16,6 @@ source('./init_h2o.R', local = T)
 source('modules/upload_file.R', local= T)
 
 server <- function(input, output, session) {
-  
   rv <- reactiveValues()
   rv$varnameComplete <- rv$perfMetrics <- rv$predMetrics <- FALSE
   reactiveVal_output(rv, 'perfMetrics', 'empty', output)
@@ -37,7 +36,6 @@ server <- function(input, output, session) {
   })
   
   init_h2o()
-  
   vars <- reactiveValues()
   
   observeEvent(input$predict_btn,{
@@ -55,10 +53,8 @@ server <- function(input, output, session) {
         reactiveVal_output(rv, 'perfMetrics', 'mismatch', output)
       }
     } else {
-      
       reactiveVal_output(rv, 'predMetrics', 'complete', output)
       vars$predict_metrics <- h2o.predict(vars$model, newdata = vars$data$h2oData)
-      
       if (!vars$data$target){
         vars$performance_result <- h2o.performance(vars$model, newdata = vars$data$h2oData)
         vars$max_scores <- as.data.frame(vars$performance_result@metrics$max_criteria_and_metric_scores)
