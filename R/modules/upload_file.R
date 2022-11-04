@@ -24,6 +24,10 @@ upload_data <- function(input){
     } else if (tolower(ext) == "xlsx") {
       dataset <- read_excel(loadedFile$datapath)
     } 
+    
+    if (!any((names(dataset) %in% varnames[,'Variable']))){
+      return("mismatch")
+    }
 
     if (!is.null(loadedFile)){
       if (!"Total_MACE" %in% names(dataset)){   

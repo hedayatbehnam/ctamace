@@ -24,7 +24,7 @@ server <- function(input, output, session) {
     rv$varnameComplete <- TRUE
     output$tableVarNames <- renderDataTable({ 
       loadingFunc(message = "Initializing variables loading...")
-      varnames <- readRDS("www/varnames.RDS")
+      varnames <<- readRDS("www/varnames.RDS")
       varnames
     }, options = list(pageLength=10, scrollX=TRUE) 
     )
