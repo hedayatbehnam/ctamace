@@ -1,1 +1,4 @@
 ^R/testthis-testers\.R$
+^LICENSE\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
